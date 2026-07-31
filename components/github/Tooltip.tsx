@@ -1,10 +1,13 @@
 "use client";
 
+import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { ActivityItem, CountNoun } from "@/types";
 import {
   formatActivityCount,
   formatContributionDate,
 } from "@/lib/utils";
+import { useTheme } from "./ThemeProvider";
 
 type TooltipProps = {
   date: string;
@@ -16,6 +19,9 @@ type TooltipProps = {
   countNoun?: CountNoun;
 };
 
+const VIEWPORT_PAD = 8;
+const GAP_ABOVE = 8;
+
 export function Tooltip({
   date,
   count,
@@ -25,17 +31,60 @@ export function Tooltip({
   items,
   countNoun,
 }: TooltipProps) {
-  if (!visible) return null;
+  const theme = useTheme();
+  const ref = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [coords, setCoords] = useState({ left: x, top: y, ready: false });
 
-  return (
+  useLayoutEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!visible || !ref.current) {
+      setCoords((prev) => ({ ...prev, ready: false }));
+      return;
+    }
+
+    const el = ref.current;
+    const rect = el.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Prefer centered above the cell, then clamp so the full tooltip stays on screen.
+    let left = x - rect.width / 2;
+    let top = y - rect.height - GAP_ABOVE;
+
+    left = Math.max(
+      VIEWPORT_PAD,
+      Math.min(left, vw - rect.width - VIEWPORT_PAD)
+    );
+
+    if (top < VIEWPORT_PAD) {
+      // Not enough room above — place just below the cell.
+      top = y + GAP_ABOVE + 12;
+    }
+    top = Math.max(
+      VIEWPORT_PAD,
+      Math.min(top, vh - rect.height - VIEWPORT_PAD)
+    );
+
+    setCoords({ left, top, ready: true });
+  }, [visible, x, y, date, count, items, countNoun]);
+
+  if (!visible || !mounted) return null;
+
+  const tooltip = (
     <div
+      ref={ref}
       role="tooltip"
-      className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[calc(100%+8px)] rounded-md px-2.5 py-1.5 text-xs shadow-lg max-w-[240px]"
+      className="pointer-events-none fixed z-[9999] w-max max-w-[min(420px,calc(100vw-16px))] rounded-md px-2.5 py-1.5 text-xs shadow-lg"
       style={{
-        left: x,
-        top: y,
-        background: "var(--pulse-tooltip-bg)",
-        color: "var(--pulse-tooltip-text)",
+        left: coords.left,
+        top: coords.top,
+        opacity: coords.ready ? 1 : 0,
+        background: theme.tooltipBg,
+        color: theme.tooltipText,
       }}
     >
       <div className="font-medium whitespace-nowrap">
@@ -47,11 +96,28 @@ export function Tooltip({
       {items && items.length > 0 && (
         <ul className="mt-1.5 space-y-0.5 border-t border-white/10 pt-1.5">
           {items.map((item, index) => (
-            <li key={`${item.title}-${index}`} className="leading-snug">
-              <span className="opacity-70">• </span>
+            <li
+              key={`${item.title}-${index}`}
+              className="flex items-baseline gap-1.5 whitespace-nowrap leading-snug"
+            >
+              <span className="shrink-0 opacity-70">•</span>
               <span>{item.title}</span>
               {item.ratingLabel && (
-                <span className="ml-1.5 opacity-90">{item.ratingLabel}</span>
+                <span
+                  className="shrink-0"
+                  style={{ color: "#00E054" }}
+                >
+                  {item.ratingLabel}
+                </span>
+              )}
+              {item.liked && (
+                <span
+                  className="shrink-0"
+                  style={{ color: "#FF8000" }}
+                  aria-label="Liked"
+                >
+                  ♥
+                </span>
               )}
             </li>
           ))}
@@ -59,4 +125,6 @@ export function Tooltip({
       )}
     </div>
   );
+
+  return createPortal(tooltip, document.body);
 }

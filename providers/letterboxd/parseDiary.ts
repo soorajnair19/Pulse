@@ -66,6 +66,13 @@ function parseRewatch($row: CheerioEl): boolean {
   return !rewatchCell.hasClass("icon-status-off");
 }
 
+function parseLiked($row: CheerioEl): boolean {
+  if ($row.find(".icon-liked, .large-liked").length > 0) return true;
+  const likeCell = $row.find("td.td-like, td.td-likes").first();
+  if (likeCell.length === 0) return false;
+  return !likeCell.hasClass("icon-status-off");
+}
+
 function parseYear($row: CheerioEl): number | null {
   const text = $row.find("td.td-released").first().text().trim();
   const match = text.match(/\d{4}/);
@@ -175,6 +182,7 @@ export function parseDiaryPage(html: string): LetterboxdPageParseResult {
       date,
       rating: parseRating($row),
       rewatch: parseRewatch($row),
+      liked: parseLiked($row),
       filmUrl: film.filmUrl,
       posterUrl: parsePoster($row),
       year: parseYear($row),
@@ -258,6 +266,14 @@ export function parseRssFeed(xml: string): LetterboxdRssParseResult {
       .toLowerCase();
     const rewatch = rewatchText === "yes" || rewatchText === "true";
 
+    const likeText = $item
+      .find("letterboxd\\:memberLike, memberLike")
+      .first()
+      .text()
+      .trim()
+      .toLowerCase();
+    const liked = likeText === "yes" || likeText === "true";
+
     const link = $item.find("link").first().text().trim();
     let filmUrl = link;
     const filmMatch = link.match(/\/film\/([^/]+)/);
@@ -274,6 +290,7 @@ export function parseRssFeed(xml: string): LetterboxdRssParseResult {
       date: watchedDate,
       rating: rating !== null && !Number.isNaN(rating) ? rating : null,
       rewatch,
+      liked,
       filmUrl: absoluteUrl(filmUrl) ?? filmUrl,
       posterUrl,
       year: year !== null && !Number.isNaN(year) ? year : null,

@@ -4,6 +4,7 @@ export type ActivityItem = {
   title: string;
   ratingLabel?: string;
   url?: string;
+  liked?: boolean;
 };
 
 export type ActivityStat = {

@@ -3,6 +3,7 @@ export type LetterboxdDiaryEntry = {
   date: string;
   rating: number | null;
   rewatch: boolean;
+  liked: boolean;
   filmUrl: string;
   posterUrl: string | null;
   year: number | null;

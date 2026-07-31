@@ -36,6 +36,7 @@ function buildActivityItem(entry: LetterboxdDiaryEntry): ActivityItem {
     ratingLabel:
       entry.rating !== null ? formatStarRating(entry.rating) : undefined,
     url: entry.filmUrl,
+    liked: entry.liked || undefined,
   };
 }
 
