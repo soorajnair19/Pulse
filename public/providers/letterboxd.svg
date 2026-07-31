@@ -1,0 +1,7 @@
+<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Letterboxd">
+  <title>Letterboxd</title>
+  <!-- Official three-dot mark: orange / green / blue -->
+  <circle cx="5.5" cy="12" r="4.5" fill="#FF8000"/>
+  <circle cx="12" cy="12" r="4.5" fill="#00E054"/>
+  <circle cx="18.5" cy="12" r="4.5" fill="#40BCF4"/>
+</svg>

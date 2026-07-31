@@ -1,0 +1,212 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { ContributionPeriod, ThemeId, WidgetVariant } from "@/types";
+import {
+  buildEmbedSnippet,
+  getProvider,
+  getSiteOrigin,
+  type ProviderId,
+} from "@/lib/providers";
+import { DEFAULT_PERIOD, parsePeriod } from "@/lib/period";
+import { getTheme } from "@/lib/themes";
+import { ProviderSelect } from "./ProviderSelect";
+import { UsernameForm } from "./UsernameForm";
+import { OptionControls } from "./OptionControls";
+import { PreviewFrame } from "./PreviewFrame";
+import { EmbedCode } from "./EmbedCode";
+
+function parseVariantParam(value: string | null): WidgetVariant {
+  if (value === "compact" || value === "detailed" || value === "default") {
+    return value;
+  }
+  return "default";
+}
+
+export function Playground() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [providerId, setProviderId] = useState<ProviderId>(() =>
+    getProvider(searchParams.get("provider")).id
+  );
+  const [usernameInput, setUsernameInput] = useState(
+    () => searchParams.get("u") ?? ""
+  );
+  const [activeUsername, setActiveUsername] = useState(
+    () => searchParams.get("u") ?? ""
+  );
+  const [variant, setVariant] = useState<WidgetVariant>(() =>
+    parseVariantParam(searchParams.get("variant"))
+  );
+  const [period, setPeriod] = useState<ContributionPeriod>(() =>
+    parsePeriod(searchParams.get("period") ?? DEFAULT_PERIOD)
+  );
+  const [theme, setTheme] = useState<ThemeId>(() => {
+    const fromUrl = searchParams.get("theme");
+    return getTheme(fromUrl).id;
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [origin, setOrigin] = useState("");
+
+  const provider = useMemo(() => getProvider(providerId), [providerId]);
+
+  useEffect(() => {
+    setOrigin(getSiteOrigin());
+  }, []);
+
+  const syncUrl = useCallback(
+    (next: {
+      provider: ProviderId;
+      username: string;
+      variant: WidgetVariant;
+      period: ContributionPeriod;
+      theme: ThemeId;
+    }) => {
+      const params = new URLSearchParams();
+      params.set("provider", next.provider);
+      if (next.username) params.set("u", next.username);
+      params.set("variant", next.variant);
+      params.set("period", next.period);
+      params.set("theme", next.theme);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router]
+  );
+
+  const embedOptions = useMemo(
+    () => ({ variant, period, theme }),
+    [variant, period, theme]
+  );
+
+  const embedPath =
+    activeUsername.length > 0
+      ? provider.buildEmbedPath(activeUsername, embedOptions)
+      : null;
+
+  const previewSrc = embedPath ? embedPath : null;
+  const height = provider.defaultHeight[variant];
+
+  const embedCode =
+    origin && embedPath
+      ? buildEmbedSnippet(origin, embedPath, height)
+      : null;
+
+  function handleGenerate() {
+    const validationError = provider.validateUsername(usernameInput);
+    if (validationError) {
+      setError(validationError);
+      setActiveUsername("");
+      return;
+    }
+
+    const trimmed = usernameInput.trim();
+    setError(null);
+    setActiveUsername(trimmed);
+    syncUrl({
+      provider: providerId,
+      username: trimmed,
+      variant,
+      period,
+      theme,
+    });
+  }
+
+  function handleProviderChange(id: ProviderId) {
+    setProviderId(id);
+    setError(null);
+    setActiveUsername("");
+    syncUrl({
+      provider: id,
+      username: "",
+      variant,
+      period,
+      theme,
+    });
+  }
+
+  function handleVariantChange(next: WidgetVariant) {
+    setVariant(next);
+    syncUrl({
+      provider: providerId,
+      username: activeUsername,
+      variant: next,
+      period,
+      theme,
+    });
+  }
+
+  function handlePeriodChange(next: ContributionPeriod) {
+    setPeriod(next);
+    syncUrl({
+      provider: providerId,
+      username: activeUsername,
+      variant,
+      period: next,
+      theme,
+    });
+  }
+
+  function handleThemeChange(next: ThemeId) {
+    setTheme(next);
+    syncUrl({
+      provider: providerId,
+      username: activeUsername,
+      variant,
+      period,
+      theme: next,
+    });
+  }
+
+  return (
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-4xl font-semibold tracking-tight text-[#e6edf3] sm:text-5xl">
+          PulseGrid
+        </h1>
+        <p className="text-base text-[#7d8590]">
+          Embeddable activity widgets as grids.
+        </p>
+      </header>
+
+      <section className="flex flex-col gap-6 rounded-xl border border-[#30363d] bg-[#161b22]/60 p-5 sm:p-6">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-[#7d8590]">
+            Provider
+          </p>
+          <ProviderSelect value={providerId} onChange={handleProviderChange} />
+        </div>
+
+        <UsernameForm
+          provider={provider}
+          value={usernameInput}
+          error={error}
+          onChange={(value) => {
+            setUsernameInput(value);
+            if (error) setError(null);
+          }}
+          onSubmit={handleGenerate}
+        />
+
+        <OptionControls
+          variant={variant}
+          period={period}
+          theme={theme}
+          onVariantChange={handleVariantChange}
+          onPeriodChange={handlePeriodChange}
+          onThemeChange={handleThemeChange}
+        />
+      </section>
+
+      <PreviewFrame
+        src={previewSrc}
+        height={height}
+        title={`${provider.label} widget preview`}
+      />
+
+      <EmbedCode code={embedCode} />
+    </div>
+  );
+}

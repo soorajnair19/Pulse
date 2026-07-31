@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PulseGrid
 
-## Getting Started
+Embeddable activity widgets as grids.
 
-First, run the development server:
+## Setup
 
 ```bash
+cp .env.example .env.local
+# Add a GitHub personal access token
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Required env:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+GITHUB_TOKEN=ghp_...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Optional (production embed URLs in the copy snippet):
 
-## Learn More
+```
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+```
 
-To learn more about Next.js, take a look at the following resources:
+If unset, the playground uses `window.location.origin`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Playground
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open `/` on your deployed URL. Select **GitHub**, enter a username, choose variant / duration / theme, click **Generate**, then **Copy embed code**.
 
-## Deploy on Vercel
+Shareable query params:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+/?provider=github&u=octocat&variant=default&period=1y&theme=github-dark
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Embed
+
+```html
+<iframe
+  src="https://your-domain.com/embed/github/octocat"
+  width="100%"
+  height="220"
+  frameborder="0"
+></iframe>
+```
+
+### Variants
+
+| Variant | Height | URL |
+|---------|--------|-----|
+| compact | ~120px | `?variant=compact` |
+| default | ~220px | `?variant=default` (recommended) |
+| detailed | ~380px | `?variant=detailed` |
+
+### Parameters
+
+- `theme` — `github-dark` (default), `github-light`, `minimal`, `glass`, `figma`, `nord`, `dracula`, `catppuccin`
+- `period` — `3m` \| `6m` \| `1y` (default)
+- `showLegend` — `true` \| `false`
+- `showMonths` — `true` \| `false`
+- `showWeekdays` — `true` \| `false`
+- `cellSize` — `6`–`20`
+- `gap` — `1`–`8`
+- `radius` — `0`–`8`
+
+### API
+
+`GET /api/github/contributions/[username]` — JSON contribution data (cached 24h).
