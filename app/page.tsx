@@ -4,7 +4,10 @@ import { Playground } from "@/components/playground/Playground";
 function PlaygroundFallback() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-      <div className="h-12 w-40 animate-pulse rounded bg-[#21262d]" />
+      <div className="flex items-center gap-3">
+        <div className="size-9 animate-pulse rounded-sm bg-[#21262d]" />
+        <div className="h-12 w-32 animate-pulse rounded bg-[#21262d]" />
+      </div>
       <div className="h-5 w-72 animate-pulse rounded bg-[#21262d]" />
       <div className="mt-4 h-64 animate-pulse rounded-xl border border-[#30363d] bg-[#161b22]/60" />
     </div>

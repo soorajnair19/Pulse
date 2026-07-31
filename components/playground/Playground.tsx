@@ -17,6 +17,7 @@ import { OptionControls } from "./OptionControls";
 import { PreviewFrame } from "./PreviewFrame";
 import { WidgetActions } from "./WidgetActions";
 import { EmbedCode } from "./EmbedCode";
+import { PulseLogo } from "@/components/shared/PulseLogo";
 
 function parseVariantParam(value: string | null): WidgetVariant {
   if (value === "compact" || value === "detailed" || value === "default") {
@@ -169,7 +170,8 @@ export function Playground() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
       <header className="flex flex-col gap-2">
-        <h1 className="text-4xl font-semibold tracking-tight text-[#e6edf3] sm:text-5xl">
+        <h1 className="flex items-center gap-3 text-4xl font-semibold tracking-tight text-[#e6edf3] sm:text-5xl">
+          <PulseLogo accent={provider.heatmapAccent} />
           Pulse
         </h1>
         <p className="text-base text-[#7d8590]">
