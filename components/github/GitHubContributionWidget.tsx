@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import type { ContributionData, WidgetVariant } from "@/types";
 import { ContributionHeatmap } from "./ContributionHeatmap";
 import { Legend } from "./Legend";
@@ -68,13 +67,16 @@ export function GitHubContributionWidget({
       {variant === "detailed" && (
         <div className="mb-3 flex items-center gap-3">
           {data.avatarUrl && (
-            <Image
+            // Native img + crossOrigin so playground PNG export can draw the avatar.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={data.avatarUrl}
               alt={`${data.username} avatar`}
               width={40}
               height={40}
               className="rounded-full"
-              unoptimized
+              crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
             />
           )}
           <div className="min-w-0 flex-1">

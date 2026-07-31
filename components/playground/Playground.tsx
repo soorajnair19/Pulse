@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ContributionPeriod, ThemeId, WidgetVariant } from "@/types";
 import {
@@ -15,6 +15,7 @@ import { ProviderSelect } from "./ProviderSelect";
 import { UsernameForm } from "./UsernameForm";
 import { OptionControls } from "./OptionControls";
 import { PreviewFrame } from "./PreviewFrame";
+import { WidgetActions } from "./WidgetActions";
 import { EmbedCode } from "./EmbedCode";
 
 function parseVariantParam(value: string | null): WidgetVariant {
@@ -50,8 +51,13 @@ export function Playground() {
   });
   const [error, setError] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
+  const [previewReady, setPreviewReady] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const provider = useMemo(() => getProvider(providerId), [providerId]);
+  const handlePreviewLoadChange = useCallback((loaded: boolean) => {
+    setPreviewReady(loaded);
+  }, []);
 
   useEffect(() => {
     setOrigin(getSiteOrigin());
@@ -201,9 +207,18 @@ export function Playground() {
       </section>
 
       <PreviewFrame
+        ref={iframeRef}
         src={previewSrc}
         height={height}
         title={`${provider.label} widget preview`}
+        onLoadChange={handlePreviewLoadChange}
+      />
+
+      <WidgetActions
+        code={embedCode}
+        filename={`pulse-${providerId}-${(activeUsername || "widget").replace(/[^a-zA-Z0-9._-]/g, "_")}.png`}
+        iframeRef={iframeRef}
+        canDownload={Boolean(previewSrc) && previewReady}
       />
 
       <EmbedCode code={embedCode} />
