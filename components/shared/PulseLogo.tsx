@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { accentHeatmapLevels } from "@/lib/themes";
+import { pulseLogoPalette } from "@/lib/pulse-logo";
 
 type PulseLogoProps = {
   className?: string;
@@ -11,12 +11,12 @@ type PulseLogoProps = {
 export function PulseLogo({ className, accent }: PulseLogoProps) {
   const style = accent
     ? (() => {
-        const levels = accentHeatmapLevels("#0d1117", accent);
+        const [c1, c2, c3, c4] = pulseLogoPalette(accent);
         return {
-          "--pulse-logo-c1": levels[1],
-          "--pulse-logo-c2": levels[2],
-          "--pulse-logo-c3": levels[3],
-          "--pulse-logo-c4": levels[4],
+          "--pulse-logo-c1": c1,
+          "--pulse-logo-c2": c2,
+          "--pulse-logo-c3": c3,
+          "--pulse-logo-c4": c4,
         } as CSSProperties;
       })()
     : undefined;
