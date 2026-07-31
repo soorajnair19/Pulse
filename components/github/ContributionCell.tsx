@@ -1,11 +1,19 @@
 "use client";
 
 import { useTheme } from "./ThemeProvider";
-import type { ContributionLevel } from "@/types";
+import type { ActivityItem, ContributionLevel, CountNoun } from "@/types";
 import {
-  formatContributionCount,
+  formatActivityCount,
   formatContributionDate,
 } from "@/lib/utils";
+
+export type CellHoverPayload = {
+  date: string;
+  count: number;
+  x: number;
+  y: number;
+  items?: ActivityItem[];
+};
 
 type ContributionCellProps = {
   date: string;
@@ -13,7 +21,9 @@ type ContributionCellProps = {
   level: ContributionLevel;
   size: number;
   radius: number;
-  onHover?: (payload: { date: string; count: number; x: number; y: number } | null) => void;
+  items?: ActivityItem[];
+  countNoun?: CountNoun;
+  onHover?: (payload: CellHoverPayload | null) => void;
 };
 
 export function ContributionCell({
@@ -22,10 +32,12 @@ export function ContributionCell({
   level,
   size,
   radius,
+  items,
+  countNoun,
   onHover,
 }: ContributionCellProps) {
   const theme = useTheme();
-  const label = `${formatContributionDate(date)}: ${formatContributionCount(count)}`;
+  const label = `${formatContributionDate(date)}: ${formatActivityCount(count, countNoun)}`;
 
   return (
     <button
@@ -43,6 +55,7 @@ export function ContributionCell({
         onHover?.({
           date,
           count,
+          items,
           x: rect.left + rect.width / 2,
           y: rect.top,
         });
@@ -53,6 +66,7 @@ export function ContributionCell({
         onHover?.({
           date,
           count,
+          items,
           x: rect.left + rect.width / 2,
           y: rect.top,
         });

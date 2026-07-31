@@ -7,19 +7,15 @@ import {
   useRef,
   useState,
 } from "react";
-import type { ContributionWeek } from "@/types";
-import { ContributionCell } from "./ContributionCell";
+import type { ContributionWeek, CountNoun } from "@/types";
+import {
+  ContributionCell,
+  type CellHoverPayload,
+} from "./ContributionCell";
 import { MonthLabels } from "./MonthLabels";
 import { Tooltip } from "./Tooltip";
 
 const WEEKDAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
-
-type HoverState = {
-  date: string;
-  count: number;
-  x: number;
-  y: number;
-} | null;
 
 type ContributionHeatmapProps = {
   weeks: ContributionWeek[];
@@ -28,6 +24,7 @@ type ContributionHeatmapProps = {
   radius?: number;
   showMonths?: boolean;
   showWeekdays?: boolean;
+  countNoun?: CountNoun;
 };
 
 export function ContributionHeatmap({
@@ -37,8 +34,9 @@ export function ContributionHeatmap({
   radius = 2,
   showMonths = true,
   showWeekdays = false,
+  countNoun,
 }: ContributionHeatmapProps) {
-  const [hover, setHover] = useState<HoverState>(null);
+  const [hover, setHover] = useState<CellHoverPayload | null>(null);
   const [scale, setScale] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -68,7 +66,7 @@ export function ContributionHeatmap({
     return () => observer.disconnect();
   }, [naturalWidth]);
 
-  const handleHover = useCallback((payload: HoverState) => {
+  const handleHover = useCallback((payload: CellHoverPayload | null) => {
     setHover(payload);
   }, []);
 
@@ -140,6 +138,8 @@ export function ContributionHeatmap({
                   date={day.date}
                   count={day.count}
                   level={day.level}
+                  items={day.items}
+                  countNoun={countNoun}
                   size={cellSize}
                   radius={radius}
                   onHover={handleHover}
@@ -153,6 +153,8 @@ export function ContributionHeatmap({
       <Tooltip
         date={hover?.date ?? ""}
         count={hover?.count ?? 0}
+        items={hover?.items}
+        countNoun={countNoun}
         x={hover?.x ?? 0}
         y={hover?.y ?? 0}
         visible={hover !== null}

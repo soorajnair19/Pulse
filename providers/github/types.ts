@@ -49,28 +49,4 @@ export const LEVEL_MAP: Record<GitHubContributionLevel, ContributionLevel> = {
   FOURTH_QUARTILE: 4,
 };
 
-export class ProviderError extends Error {
-  readonly code:
-    | "USER_NOT_FOUND"
-    | "MISSING_TOKEN"
-    | "RATE_LIMITED"
-    | "NETWORK_ERROR"
-    | "UNKNOWN";
-  readonly status: number;
-
-  constructor(
-    code:
-      | "USER_NOT_FOUND"
-      | "MISSING_TOKEN"
-      | "RATE_LIMITED"
-      | "NETWORK_ERROR"
-      | "UNKNOWN",
-    message: string,
-    status: number
-  ) {
-    super(message);
-    this.name = "ProviderError";
-    this.code = code;
-    this.status = status;
-  }
-}
+export { ProviderError } from "@/lib/provider-error";

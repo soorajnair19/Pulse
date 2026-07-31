@@ -1,4 +1,4 @@
-import type { WidgetVariant } from "@/types";
+import type { CountNoun, WidgetVariant } from "@/types";
 
 export function cn(
   ...inputs: Array<string | false | null | undefined>
@@ -54,7 +54,19 @@ export function formatContributionDate(dateStr: string): string {
   });
 }
 
+const DEFAULT_COUNT_NOUN: CountNoun = {
+  singular: "contribution",
+  plural: "contributions",
+};
+
+export function formatActivityCount(
+  count: number,
+  countNoun: CountNoun = DEFAULT_COUNT_NOUN
+): string {
+  if (count === 1) return `1 ${countNoun.singular}`;
+  return `${count.toLocaleString()} ${countNoun.plural}`;
+}
+
 export function formatContributionCount(count: number): string {
-  if (count === 1) return "1 contribution";
-  return `${count.toLocaleString()} contributions`;
+  return formatActivityCount(count);
 }

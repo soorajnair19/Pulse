@@ -3,11 +3,12 @@
 import {
   createContext,
   useContext,
+  useMemo,
   type CSSProperties,
   type ReactNode,
 } from "react";
 import {
-  getTheme,
+  resolveTheme,
   themeToCssVars,
   type ThemeTokens,
 } from "@/lib/themes";
@@ -20,16 +21,22 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({
   themeId,
+  heatmapAccent,
   children,
   className,
   style,
 }: {
   themeId: string;
+  /** When set, remaps heatmap levels 1–4 toward this accent. */
+  heatmapAccent?: string;
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
 }) {
-  const theme = getTheme(themeId);
+  const theme = useMemo(
+    () => resolveTheme(themeId, heatmapAccent),
+    [themeId, heatmapAccent]
+  );
   const cssVars = themeToCssVars(theme) as CSSProperties;
 
   return (

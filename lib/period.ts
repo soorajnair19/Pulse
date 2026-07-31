@@ -6,6 +6,7 @@ export const PERIOD_OPTIONS: Array<{
   id: ContributionPeriod;
   label: string;
 }> = [
+  { id: "1m", label: "1 month" },
   { id: "3m", label: "3 months" },
   { id: "6m", label: "6 months" },
   { id: "1y", label: "1 year" },
@@ -15,11 +16,11 @@ export function parsePeriod(
   value: string | string[] | null | undefined
 ): ContributionPeriod {
   const raw = Array.isArray(value) ? value[0] : value;
-  if (raw === "3m" || raw === "6m" || raw === "1y") return raw;
+  if (raw === "1m" || raw === "3m" || raw === "6m" || raw === "1y") return raw;
   return DEFAULT_PERIOD;
 }
 
-/** ISO date range for GitHub `contributionsCollection(from, to)`. */
+/** ISO date range for provider lookbacks (`from`, `to`). */
 export function getPeriodRange(period: ContributionPeriod): {
   from: string;
   to: string;
@@ -28,6 +29,9 @@ export function getPeriodRange(period: ContributionPeriod): {
   const from = new Date(to);
 
   switch (period) {
+    case "1m":
+      from.setUTCMonth(from.getUTCMonth() - 1);
+      break;
     case "3m":
       from.setUTCMonth(from.getUTCMonth() - 3);
       break;

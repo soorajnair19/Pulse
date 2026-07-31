@@ -1,9 +1,26 @@
 export type ContributionLevel = 0 | 1 | 2 | 3 | 4;
 
+export type ActivityItem = {
+  title: string;
+  ratingLabel?: string;
+  url?: string;
+};
+
+export type ActivityStat = {
+  label: string;
+  value: string | number;
+};
+
+export type CountNoun = {
+  singular: string;
+  plural: string;
+};
+
 export type ContributionDay = {
   date: string;
   count: number;
   level: ContributionLevel;
+  items?: ActivityItem[];
 };
 
 export type ContributionWeek = {
@@ -23,12 +40,18 @@ export type ContributionData = {
   followers?: number;
   publicRepos?: number;
   weeks: ContributionWeek[];
+  /** Primary stats label — defaults to "Contributions". */
+  totalLabel?: string;
+  /** Tooltip/count copy — defaults to contribution(s). */
+  countNoun?: CountNoun;
+  /** Extra stats beyond total + streaks (e.g. Average Rating, Rewatches). */
+  extraStats?: ActivityStat[];
 };
 
 export type WidgetVariant = "compact" | "default" | "detailed";
 
 /** Contribution calendar lookback presets. */
-export type ContributionPeriod = "3m" | "6m" | "1y";
+export type ContributionPeriod = "1m" | "3m" | "6m" | "1y";
 
 export type ThemeId =
   | "github-dark"
@@ -45,6 +68,8 @@ export type ProviderErrorCode =
   | "MISSING_TOKEN"
   | "RATE_LIMITED"
   | "NETWORK_ERROR"
+  | "PRIVATE_PROFILE"
+  | "PARSE_ERROR"
   | "UNKNOWN";
 
 export type ApiErrorBody = {

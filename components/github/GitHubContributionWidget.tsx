@@ -1,6 +1,7 @@
 "use client";
 
 import type { ContributionData, WidgetVariant } from "@/types";
+import { formatActivityCount } from "@/lib/utils";
 import { ContributionHeatmap } from "./ContributionHeatmap";
 import { Legend } from "./Legend";
 import { StatsBar } from "./StatsBar";
@@ -9,6 +10,8 @@ import { ThemeProvider } from "./ThemeProvider";
 export type WidgetOptions = {
   variant: WidgetVariant;
   themeId: string;
+  /** Optional brand tint for heatmap cells (e.g. Letterboxd orange). */
+  heatmapAccent?: string;
   showLegend: boolean;
   showMonths: boolean;
   showWeekdays: boolean;
@@ -40,6 +43,7 @@ export function GitHubContributionWidget({
   const {
     variant,
     themeId,
+    heatmapAccent,
     showLegend,
     showMonths,
     showWeekdays,
@@ -49,10 +53,14 @@ export function GitHubContributionWidget({
   } = options;
 
   const minHeight = variantMinHeight(variant);
+  const totalLabel = data.totalLabel ?? "Contributions";
+  const hasProfileStats =
+    data.followers !== undefined || data.publicRepos !== undefined;
 
   return (
     <ThemeProvider
       themeId={themeId}
+      heatmapAccent={heatmapAccent}
       className="pulse-widget box-border flex h-full w-full flex-col justify-between overflow-hidden font-sans antialiased"
       style={{
         minHeight,
@@ -90,36 +98,42 @@ export function GitHubContributionWidget({
               @{data.username}
             </p>
           </div>
-          <div
-            className="flex shrink-0 gap-4 text-right text-xs"
-            style={{ color: "var(--pulse-text-muted)" }}
-          >
-            <div>
-              <div
-                className="font-semibold tabular-nums"
-                style={{ color: "var(--pulse-text)" }}
-              >
-                {(data.followers ?? 0).toLocaleString()}
-              </div>
-              <div>followers</div>
+          {hasProfileStats && (
+            <div
+              className="flex shrink-0 gap-4 text-right text-xs"
+              style={{ color: "var(--pulse-text-muted)" }}
+            >
+              {data.followers !== undefined && (
+                <div>
+                  <div
+                    className="font-semibold tabular-nums"
+                    style={{ color: "var(--pulse-text)" }}
+                  >
+                    {data.followers.toLocaleString()}
+                  </div>
+                  <div>followers</div>
+                </div>
+              )}
+              {data.publicRepos !== undefined && (
+                <div>
+                  <div
+                    className="font-semibold tabular-nums"
+                    style={{ color: "var(--pulse-text)" }}
+                  >
+                    {data.publicRepos.toLocaleString()}
+                  </div>
+                  <div>repos</div>
+                </div>
+              )}
             </div>
-            <div>
-              <div
-                className="font-semibold tabular-nums"
-                style={{ color: "var(--pulse-text)" }}
-              >
-                {(data.publicRepos ?? 0).toLocaleString()}
-              </div>
-              <div>repos</div>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
       {variant === "compact" ? (
         <div className="mb-2 flex items-baseline justify-between gap-2">
           <span className="text-xs font-medium tabular-nums">
-            {data.totalContributions.toLocaleString()} contributions
+            {formatActivityCount(data.totalContributions, data.countNoun)}
           </span>
         </div>
       ) : (
@@ -128,6 +142,8 @@ export function GitHubContributionWidget({
             totalContributions={data.totalContributions}
             currentStreak={data.currentStreak}
             longestStreak={data.longestStreak}
+            totalLabel={totalLabel}
+            extraStats={data.extraStats}
             showStreaks
           />
         </div>
@@ -141,6 +157,7 @@ export function GitHubContributionWidget({
           radius={radius}
           showMonths={showMonths}
           showWeekdays={showWeekdays}
+          countNoun={data.countNoun}
         />
       </div>
 

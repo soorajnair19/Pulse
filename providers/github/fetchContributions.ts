@@ -7,10 +7,8 @@ import {
   GITHUB_GRAPHQL_URL,
 } from "./constants";
 import { mapGitHubUserToContributionData } from "./mapper";
-import {
-  ProviderError,
-  type GitHubGraphQLResponse,
-} from "./types";
+import { ProviderError } from "@/lib/provider-error";
+import type { GitHubGraphQLResponse } from "./types";
 
 export async function fetchContributions(
   username: string,

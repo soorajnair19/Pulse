@@ -1,10 +1,14 @@
 "use client";
 
+import type { ActivityStat } from "@/types";
+
 type StatsBarProps = {
   totalContributions: number;
   currentStreak: number;
   longestStreak: number;
   showStreaks?: boolean;
+  totalLabel?: string;
+  extraStats?: ActivityStat[];
 };
 
 function Stat({
@@ -34,16 +38,21 @@ export function StatsBar({
   currentStreak,
   longestStreak,
   showStreaks = true,
+  totalLabel = "Contributions",
+  extraStats,
 }: StatsBarProps) {
   return (
     <div className="flex items-end gap-6 flex-wrap">
-      <Stat label="Contributions" value={totalContributions} />
+      <Stat label={totalLabel} value={totalContributions} />
       {showStreaks && (
         <>
           <Stat label="Current streak" value={`${currentStreak}d`} />
           <Stat label="Longest streak" value={`${longestStreak}d`} />
         </>
       )}
+      {extraStats?.map((stat) => (
+        <Stat key={stat.label} label={stat.label} value={stat.value} />
+      ))}
     </div>
   );
 }

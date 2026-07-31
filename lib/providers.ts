@@ -1,6 +1,6 @@
 import type { ContributionPeriod, ThemeId, WidgetVariant } from "@/types";
 
-export type ProviderId = "github" | "figma" | "goodreads" | "letterboxd";
+export type ProviderId = "github" | "letterboxd" | "figma" | "goodreads";
 
 export type EmbedOptions = {
   variant: WidgetVariant;
@@ -13,6 +13,8 @@ export type PulseProvider = {
   label: string;
   /** Brand accent used for selected tab highlight + Generate CTA. */
   accent: string;
+  /** Optional heatmap cell tint (levels 1–4). Falls back to theme greens when omitted. */
+  heatmapAccent?: string;
   usernamePlaceholder: string;
   usernameLabel: string;
   enabled: boolean;
@@ -23,6 +25,9 @@ export type PulseProvider = {
 
 const GITHUB_USERNAME_RE =
   /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$/;
+
+const LETTERBOXD_USERNAME_RE =
+  /^[a-zA-Z0-9](?:[a-zA-Z0-9_-]{0,28}[a-zA-Z0-9])?$/;
 
 function buildQuery(opts: EmbedOptions): string {
   const params = new URLSearchParams({
@@ -58,6 +63,30 @@ export const providers: PulseProvider[] = [
     },
   },
   {
+    id: "letterboxd",
+    label: "Letterboxd",
+    accent: "#FF8001",
+    heatmapAccent: "#FF8001",
+    usernamePlaceholder: "johndoe",
+    usernameLabel: "Letterboxd username",
+    enabled: true,
+    validateUsername: (username) => {
+      const trimmed = username.trim();
+      if (!trimmed) return "Enter a username.";
+      if (!LETTERBOXD_USERNAME_RE.test(trimmed)) {
+        return "Invalid Letterboxd username.";
+      }
+      return null;
+    },
+    buildEmbedPath: (username, opts) =>
+      `/embed/letterboxd/${encodeURIComponent(username.trim())}?${buildQuery(opts)}`,
+    defaultHeight: {
+      compact: 120,
+      default: 220,
+      detailed: 380,
+    },
+  },
+  {
     id: "figma",
     label: "Figma",
     accent: "#a259ff",
@@ -74,17 +103,6 @@ export const providers: PulseProvider[] = [
     accent: "#372213",
     usernamePlaceholder: "johndoe",
     usernameLabel: "Goodreads user ID",
-    enabled: false,
-    validateUsername: () => "Coming soon.",
-    buildEmbedPath: () => "/",
-    defaultHeight: { compact: 120, default: 220, detailed: 380 },
-  },
-  {
-    id: "letterboxd",
-    label: "Letterboxd",
-    accent: "#00e054",
-    usernamePlaceholder: "johndoe",
-    usernameLabel: "Letterboxd username",
     enabled: false,
     validateUsername: () => "Coming soon.",
     buildEmbedPath: () => "/",

@@ -16,7 +16,7 @@ export type ThemeTokens = {
 export const themes: Record<ThemeId, ThemeTokens> = {
   "github-dark": {
     id: "github-dark",
-    name: "GitHub Dark",
+    name: "Dark",
     background: "#0d1117",
     surface: "#161b22",
     text: "#e6edf3",
@@ -28,7 +28,7 @@ export const themes: Record<ThemeId, ThemeTokens> = {
   },
   "github-light": {
     id: "github-light",
-    name: "GitHub Light",
+    name: "Light",
     background: "#ffffff",
     surface: "#f6f8fa",
     text: "#1f2328",
@@ -70,7 +70,7 @@ export const themes: Record<ThemeId, ThemeTokens> = {
   },
   figma: {
     id: "figma",
-    name: "Figma",
+    name: "Violet",
     background: "#1e1e1e",
     surface: "#2c2c2c",
     text: "#ffffff",
@@ -82,7 +82,7 @@ export const themes: Record<ThemeId, ThemeTokens> = {
   },
   nord: {
     id: "nord",
-    name: "Nord",
+    name: "Arctic",
     background: "#2e3440",
     surface: "#3b4252",
     text: "#eceff4",
@@ -94,7 +94,7 @@ export const themes: Record<ThemeId, ThemeTokens> = {
   },
   dracula: {
     id: "dracula",
-    name: "Dracula",
+    name: "Twilight",
     background: "#282a36",
     surface: "#21222c",
     text: "#f8f8f2",
@@ -106,7 +106,7 @@ export const themes: Record<ThemeId, ThemeTokens> = {
   },
   catppuccin: {
     id: "catppuccin",
-    name: "Catppuccin",
+    name: "Pastel",
     background: "#1e1e2e",
     surface: "#181825",
     text: "#cdd6f4",
@@ -120,11 +120,78 @@ export const themes: Record<ThemeId, ThemeTokens> = {
 
 export const DEFAULT_THEME: ThemeId = "github-dark";
 
+function parseCssColor(input: string): [number, number, number] | null {
+  const hex = input.trim();
+  if (hex.startsWith("#")) {
+    const normalized = hex.slice(1);
+    const full =
+      normalized.length === 3
+        ? normalized
+            .split("")
+            .map((c) => c + c)
+            .join("")
+        : normalized;
+    if (full.length !== 6) return null;
+    return [
+      Number.parseInt(full.slice(0, 2), 16),
+      Number.parseInt(full.slice(2, 4), 16),
+      Number.parseInt(full.slice(4, 6), 16),
+    ];
+  }
+
+  const rgb = hex.match(
+    /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i
+  );
+  if (!rgb) return null;
+  return [
+    Number.parseFloat(rgb[1]),
+    Number.parseFloat(rgb[2]),
+    Number.parseFloat(rgb[3]),
+  ];
+}
+
+function mixRgb(
+  a: [number, number, number],
+  b: [number, number, number],
+  t: number
+): string {
+  const mix = (i: number) => Math.round(a[i] + (b[i] - a[i]) * t);
+  return `rgb(${mix(0)}, ${mix(1)}, ${mix(2)})`;
+}
+
+/** Build heatmap levels 0–4 tinted toward a brand accent (keeps empty cell from theme). */
+export function accentHeatmapLevels(
+  emptyLevel: string,
+  accent: string
+): [string, string, string, string, string] {
+  const empty = parseCssColor(emptyLevel) ?? [22, 27, 34];
+  const accentRgb = parseCssColor(accent) ?? [255, 128, 1];
+  return [
+    emptyLevel,
+    mixRgb(empty, accentRgb, 0.35),
+    mixRgb(empty, accentRgb, 0.55),
+    mixRgb(empty, accentRgb, 0.75),
+    accent.startsWith("#") ? accent : mixRgb(empty, accentRgb, 1),
+  ];
+}
+
 export function getTheme(id: string | undefined | null): ThemeTokens {
   if (id && id in themes) {
     return themes[id as ThemeId];
   }
   return themes[DEFAULT_THEME];
+}
+
+export function resolveTheme(
+  id: string | undefined | null,
+  heatmapAccent?: string | null
+): ThemeTokens {
+  const theme = getTheme(id);
+  if (!heatmapAccent) return theme;
+  return {
+    ...theme,
+    levels: accentHeatmapLevels(theme.levels[0], heatmapAccent),
+  };
 }
 
 export function themeToCssVars(theme: ThemeTokens): Record<string, string> {
