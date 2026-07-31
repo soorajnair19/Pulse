@@ -26,7 +26,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params;
   return {
-    title: `${username} · GitHub Contributions · PulseGrid`,
+    title: `${username} · GitHub Contributions · Pulse`,
     robots: { index: false, follow: false },
   };
 }

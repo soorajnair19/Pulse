@@ -164,7 +164,7 @@ export function Playground() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-4xl font-semibold tracking-tight text-[#e6edf3] sm:text-5xl">
-          PulseGrid
+          Pulse
         </h1>
         <p className="text-base text-[#7d8590]">
           Embeddable activity widgets as grids.

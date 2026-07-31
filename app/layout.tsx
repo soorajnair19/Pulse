@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "PulseGrid",
-    template: "%s · PulseGrid",
+    default: "Pulse",
+    template: "%s · Pulse",
   },
   description: "Embeddable activity widgets as grids.",
 };

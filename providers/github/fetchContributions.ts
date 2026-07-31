@@ -37,7 +37,7 @@ export async function fetchContributions(
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
         Accept: "application/json",
-        "User-Agent": "PulseGrid-Widget",
+        "User-Agent": "Pulse-Widget",
       },
       body: JSON.stringify({
         query: CONTRIBUTION_QUERY,

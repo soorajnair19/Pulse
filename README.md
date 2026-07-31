@@ -1,4 +1,4 @@
-# PulseGrid
+# Pulse
 
 Embeddable activity widgets as grids.
 
