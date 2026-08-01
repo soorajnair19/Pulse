@@ -34,12 +34,24 @@ export function Playground() {
   const [providerId, setProviderId] = useState<ProviderId>(() =>
     getProvider(searchParams.get("provider")).id
   );
-  const [usernameInput, setUsernameInput] = useState(
-    () => searchParams.get("u") ?? ""
-  );
-  const [activeUsername, setActiveUsername] = useState(
-    () => searchParams.get("u") ?? ""
-  );
+  const [usernamesByProvider, setUsernamesByProvider] = useState<
+    Partial<Record<ProviderId, string>>
+  >(() => {
+    const initial = searchParams.get("u") ?? "";
+    if (!initial) return {};
+    const id = getProvider(searchParams.get("provider")).id;
+    return { [id]: initial };
+  });
+  const [activeByProvider, setActiveByProvider] = useState<
+    Partial<Record<ProviderId, string>>
+  >(() => {
+    const initial = searchParams.get("u") ?? "";
+    if (!initial) return {};
+    const id = getProvider(searchParams.get("provider")).id;
+    return { [id]: initial };
+  });
+  const usernameInput = usernamesByProvider[providerId] ?? "";
+  const activeUsername = activeByProvider[providerId] ?? "";
   const [variant, setVariant] = useState<WidgetVariant>(() =>
     parseVariantParam(searchParams.get("variant"))
   );
@@ -105,13 +117,13 @@ export function Playground() {
     const validationError = provider.validateUsername(usernameInput);
     if (validationError) {
       setError(validationError);
-      setActiveUsername("");
+      setActiveByProvider((prev) => ({ ...prev, [providerId]: "" }));
       return;
     }
 
     const trimmed = usernameInput.trim();
     setError(null);
-    setActiveUsername(trimmed);
+    setActiveByProvider((prev) => ({ ...prev, [providerId]: trimmed }));
     syncUrl({
       provider: providerId,
       username: trimmed,
@@ -124,10 +136,9 @@ export function Playground() {
   function handleProviderChange(id: ProviderId) {
     setProviderId(id);
     setError(null);
-    setActiveUsername("");
     syncUrl({
       provider: id,
-      username: "",
+      username: activeByProvider[id] ?? "",
       variant,
       period,
       theme,
@@ -192,7 +203,7 @@ export function Playground() {
           value={usernameInput}
           error={error}
           onChange={(value) => {
-            setUsernameInput(value);
+            setUsernamesByProvider((prev) => ({ ...prev, [providerId]: value }));
             if (error) setError(null);
           }}
           onSubmit={handleGenerate}
@@ -210,6 +221,7 @@ export function Playground() {
 
       <PreviewFrame
         ref={iframeRef}
+        cacheKey={providerId}
         src={previewSrc}
         height={height}
         title={`${provider.label} widget preview`}
