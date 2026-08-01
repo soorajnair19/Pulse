@@ -1,70 +1,71 @@
 # Pulse
 
-Embeddable activity widgets as grids.
+Turn your activity into a little grid you can drop on a website, blog, or README.
 
-## Setup
+Pulse builds heatmap-style widgets from the things you already do online — coding on **GitHub**, watching films on **Letterboxd**, and more soon.
 
-```bash
-cp .env.example .env.local
-# Add a GitHub personal access token
-npm install
-npm run dev
+## What you can do
+
+1. Open the site
+2. Pick a provider (GitHub or Letterboxd)
+3. Enter your username
+4. Choose a size, time range, and look
+5. Hit **Generate**
+6. **Copy the embed code** — or download the widget as an image
+
+That’s it. No account required.
+
+## Supported today
+
+| Provider | What it shows |
+|----------|----------------|
+| **GitHub** | Your contribution activity |
+| **Letterboxd** | Your film diary |
+
+Coming later: Figma and Goodreads.
+
+## Customize
+
+- **Size** — Compact, Default, or Detailed
+- **Duration** — Last month, 3 months, 6 months, or a full year
+- **Theme** — Dark, Light, Minimal, Glass, Violet, Arctic, Twilight, Pastel
+
+Switch between providers anytime — each one remembers its own username and preview.
+
+## Embed it
+
+After you generate a widget, copy the iframe snippet and paste it where you want it to appear:
+
+```html
+<iframe
+  src="https://your-domain.com/embed/github/yourusername"
+  width="100%"
+  height="220"
+  frameborder="0"
+  loading="lazy"
+></iframe>
 ```
 
-Required env:
+Letterboxd works the same way — just use `/embed/letterboxd/yourusername` instead.
 
-```
-GITHUB_TOKEN=ghp_...
-```
-
-Optional (production embed URLs in the copy snippet):
-
-```
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
-```
-
-If unset, the playground uses `window.location.origin`.
-
-## Playground
-
-Open `/` on your deployed URL. Select **GitHub**, enter a username, choose variant / duration / theme, click **Generate**, then **Copy embed code**.
-
-Shareable query params:
+You can also share a playground link with your settings baked in, for example:
 
 ```
 /?provider=github&u=octocat&variant=default&period=1y&theme=github-dark
 ```
 
-## Embed
+## Run it yourself
 
-```html
-<iframe
-  src="https://your-domain.com/embed/github/octocat"
-  width="100%"
-  height="220"
-  frameborder="0"
-></iframe>
+If you want to run Pulse locally:
+
+1. Copy `.env.example` to `.env.local`
+2. Add a GitHub personal access token (`GITHUB_TOKEN`) — needed for GitHub widgets
+3. Optionally set `NEXT_PUBLIC_SITE_URL` to your public site URL (used in copied embed snippets)
+4. Install and start:
+
+```bash
+npm install
+npm run dev
 ```
 
-### Variants
-
-| Variant | Height | URL |
-|---------|--------|-----|
-| compact | ~120px | `?variant=compact` |
-| default | ~220px | `?variant=default` (recommended) |
-| detailed | ~380px | `?variant=detailed` |
-
-### Parameters
-
-- `theme` — `github-dark` (default), `github-light`, `minimal`, `glass`, `figma`, `nord`, `dracula`, `catppuccin`
-- `period` — `3m` \| `6m` \| `1y` (default)
-- `showLegend` — `true` \| `false`
-- `showMonths` — `true` \| `false`
-- `showWeekdays` — `true` \| `false`
-- `cellSize` — `6`–`20`
-- `gap` — `1`–`8`
-- `radius` — `0`–`8`
-
-### API
-
-`GET /api/github/contributions/[username]` — JSON contribution data (cached 24h).
+Then open [http://localhost:3000](http://localhost:3000).
