@@ -9,7 +9,7 @@ Pulse builds heatmap-style widgets from the things you already do online — cod
 1. Open the site
 2. Pick a provider (GitHub, Letterboxd, or Goodreads)
 3. Enter your username (or Goodreads My Books URL / user ID)
-4. Choose a size, time range, and look
+4. Choose a size, year or duration, and theme
 5. Hit **Generate**
 6. **Copy the embed code** — or download the widget as an image
 
@@ -17,20 +17,20 @@ That’s it. No account required.
 
 ## Supported today
 
-| Provider | What it shows |
-|----------|----------------|
-| **GitHub** | Your contribution activity |
-| **Letterboxd** | Your film diary |
-| **Goodreads** | Books finished (by date read), with ratings when present |
+| Provider | What it shows | Time range |
+|----------|----------------|------------|
+| **GitHub** | Your contribution activity | Rolling: 1 month, 3 months, 6 months, or 1 year |
+| **Letterboxd** | Your film diary (with ratings and likes) | Calendar year — pick a recent year or enter a custom one |
+| **Goodreads** | Books finished by date read (with ratings when present) | Calendar year — pick a recent year or enter a custom one |
 
-Goodreads uses your public Read shelf finish dates — paste a My Books URL like `https://www.goodreads.com/review/list/123456` or just the numeric user ID. Duration is a **calendar year** (recent years in the dropdown, or enter any year from 1900 to the current year).
+**Goodreads setup:** paste a public My Books URL like `https://www.goodreads.com/review/list/123456`, or just the numeric user ID.
 
 Coming later: Figma.
 
 ## Customize
 
 - **Size** — Compact, Default, or Detailed
-- **Duration** — Last month, 3 months, 6 months, or a full year (GitHub). Letterboxd and Goodreads use a calendar year (pick a recent year or enter a custom one).
+- **Duration / Year** — Rolling lookbacks on GitHub; calendar year on Letterboxd and Goodreads (recent years in the dropdown, or type any year from 1900 to the current year)
 - **Theme** — Dark, Light, Minimal, Glass, Violet, Arctic, Twilight, Pastel
 
 Switch between providers anytime — each one remembers its own username and preview.
@@ -49,12 +49,17 @@ After you generate a widget, copy the iframe snippet and paste it where you want
 ></iframe>
 ```
 
-Letterboxd and Goodreads work the same way — use `/embed/letterboxd/yourusername` or `/embed/goodreads/123456`.
+Letterboxd and Goodreads work the same way:
 
-You can also share a playground link with your settings baked in, for example:
+- `/embed/letterboxd/yourusername`
+- `/embed/goodreads/123456`
+
+You can also share a playground link with your settings baked in:
 
 ```
 /?provider=github&u=octocat&variant=default&period=1y&theme=github-dark
+/?provider=letterboxd&u=yourusername&variant=default&period=2025&theme=github-dark
+/?provider=goodreads&u=123456&variant=default&period=2025&theme=github-dark
 ```
 
 ## Run it yourself
