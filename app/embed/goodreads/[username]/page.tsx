@@ -1,4 +1,4 @@
-import { getLetterboxdActivity, ProviderError } from "@/providers/letterboxd";
+import { getGoodreadsActivity, ProviderError } from "@/providers/goodreads";
 import { GitHubContributionWidget } from "@/components/github/GitHubContributionWidget";
 import { ThemeProvider } from "@/components/github/ThemeProvider";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -14,6 +14,9 @@ import type { Metadata } from "next";
 /** 24 hours — must be a literal for Next.js segment config. */
 export const revalidate = 86400;
 
+const GOODREADS_HEATMAP_ACCENT = "#F4B23E";
+const GOODREADS_RATING_ACCENT = "#F4B23E";
+
 type PageProps = {
   params: Promise<{ username: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -26,7 +29,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params;
   return {
-    title: `${username} · Letterboxd Diary · Pulse`,
+    title: `${username} · Goodreads · Pulse`,
     robots: { index: false, follow: false },
   };
 }
@@ -45,13 +48,13 @@ function errorCopy(error: ProviderError): { title: string; message: string } {
       };
     case "PARSE_ERROR":
       return {
-        title: "Couldn’t read diary",
+        title: "Couldn’t read shelf",
         message: error.message,
       };
     case "NETWORK_ERROR":
       return {
         title: "Network error",
-        message: "Could not reach Letterboxd. Please try again.",
+        message: "Could not reach Goodreads. Please try again.",
       };
     default:
       return {
@@ -61,7 +64,7 @@ function errorCopy(error: ProviderError): { title: string; message: string } {
   }
 }
 
-export default async function LetterboxdEmbedPage({
+export default async function GoodreadsEmbedPage({
   params,
   searchParams,
 }: PageProps) {
@@ -69,14 +72,12 @@ export default async function LetterboxdEmbedPage({
   const query = await searchParams;
 
   const variant = parseVariant(query.variant);
-  const period = parsePeriod(query.period);
+  const period = parsePeriod(query.period, "goodreads");
   const themeId = typeof query.theme === "string" ? query.theme : "github-dark";
   const theme = getTheme(themeId);
 
-  const showLegend = parseBooleanParam(
-    query.showLegend,
-    variant !== "compact"
-  );
+  // Finish-date dots use a single bright level — no Less/More scale.
+  const showLegend = parseBooleanParam(query.showLegend, false);
   const showMonths = parseBooleanParam(query.showMonths, true);
   const showWeekdays = parseBooleanParam(query.showWeekdays, false);
   const cellSize = parseNumberParam(
@@ -89,7 +90,7 @@ export default async function LetterboxdEmbedPage({
   const radius = parseNumberParam(query.radius, 2, 0, 8);
 
   try {
-    const data = await getLetterboxdActivity(username, period);
+    const data = await getGoodreadsActivity(username, period);
 
     return (
       <GitHubContributionWidget
@@ -97,11 +98,12 @@ export default async function LetterboxdEmbedPage({
         options={{
           variant,
           themeId: theme.id,
-          heatmapAccent: "#FF8001",
-          ratingAccent: "#00E054",
+          heatmapAccent: GOODREADS_HEATMAP_ACCENT,
+          ratingAccent: GOODREADS_RATING_ACCENT,
           showLegend,
           showMonths,
           showWeekdays,
+          showStreaks: false,
           cellSize,
           gap,
           radius,
@@ -120,8 +122,7 @@ export default async function LetterboxdEmbedPage({
     return (
       <ThemeProvider
         themeId={theme.id}
-        heatmapAccent="#FF8001"
-        className="h-full w-full"
+        className="pulse-embed-root flex h-full min-h-[120px] w-full items-center justify-center"
       >
         <EmptyState title={copy.title} message={copy.message} />
       </ThemeProvider>

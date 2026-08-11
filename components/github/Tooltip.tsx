@@ -17,10 +17,13 @@ type TooltipProps = {
   visible: boolean;
   items?: ActivityItem[];
   countNoun?: CountNoun;
+  /** Star rating color — defaults to Letterboxd green. */
+  ratingAccent?: string;
 };
 
 const VIEWPORT_PAD = 8;
 const GAP_ABOVE = 8;
+const DEFAULT_RATING_ACCENT = "#00E054";
 
 export function Tooltip({
   date,
@@ -30,6 +33,7 @@ export function Tooltip({
   visible,
   items,
   countNoun,
+  ratingAccent = DEFAULT_RATING_ACCENT,
 }: TooltipProps) {
   const theme = useTheme();
   const ref = useRef<HTMLDivElement>(null);
@@ -70,7 +74,7 @@ export function Tooltip({
     );
 
     setCoords({ left, top, ready: true });
-  }, [visible, x, y, date, count, items, countNoun]);
+  }, [visible, x, y, date, count, items, countNoun, ratingAccent]);
 
   if (!visible || !mounted) return null;
 
@@ -94,31 +98,39 @@ export function Tooltip({
         {formatActivityCount(count, countNoun)}
       </div>
       {items && items.length > 0 && (
-        <ul className="mt-1.5 space-y-0.5 border-t border-white/10 pt-1.5">
+        <ul className="mt-1.5 space-y-2 border-t border-white/10 pt-1.5">
           {items.map((item, index) => (
             <li
               key={`${item.title}-${index}`}
-              className="flex items-baseline gap-1.5 whitespace-nowrap leading-snug"
+              className="flex items-start gap-1.5 leading-snug"
             >
               <span className="shrink-0 opacity-70">•</span>
-              <span>{item.title}</span>
-              {item.ratingLabel && (
-                <span
-                  className="shrink-0"
-                  style={{ color: "#00E054" }}
-                >
-                  {item.ratingLabel}
-                </span>
-              )}
-              {item.liked && (
-                <span
-                  className="shrink-0"
-                  style={{ color: "#FF8000" }}
-                  aria-label="Liked"
-                >
-                  ♥
-                </span>
-              )}
+              <div className="min-w-0 flex-1">
+                <div className="whitespace-normal break-words">
+                  {item.title}
+                </div>
+                {(item.ratingLabel || item.liked) && (
+                  <div className="mt-0.5 flex items-center gap-1.5">
+                    {item.ratingLabel && (
+                      <span
+                        className="shrink-0 tracking-tight"
+                        style={{ color: ratingAccent }}
+                      >
+                        {item.ratingLabel}
+                      </span>
+                    )}
+                    {item.liked && (
+                      <span
+                        className="shrink-0"
+                        style={{ color: "#FF8000" }}
+                        aria-label="Liked"
+                      >
+                        ♥
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </li>
           ))}
         </ul>

@@ -25,6 +25,7 @@ type ContributionHeatmapProps = {
   showMonths?: boolean;
   showWeekdays?: boolean;
   countNoun?: CountNoun;
+  ratingAccent?: string;
 };
 
 export function ContributionHeatmap({
@@ -35,6 +36,7 @@ export function ContributionHeatmap({
   showMonths = true,
   showWeekdays = false,
   countNoun,
+  ratingAccent,
 }: ContributionHeatmapProps) {
   const [hover, setHover] = useState<CellHoverPayload | null>(null);
   const [scale, setScale] = useState(1);
@@ -155,6 +157,7 @@ export function ContributionHeatmap({
         count={hover?.count ?? 0}
         items={hover?.items}
         countNoun={countNoun}
+        ratingAccent={ratingAccent}
         x={hover?.x ?? 0}
         y={hover?.y ?? 0}
         visible={hover !== null}

@@ -1,8 +1,10 @@
 "use client";
 
 import type { ContributionPeriod, ThemeId, WidgetVariant } from "@/types";
-import { PERIOD_OPTIONS } from "@/lib/period";
+import type { ProviderId } from "@/lib/providers";
+import { getPeriodOptions } from "@/lib/period";
 import { themes } from "@/lib/themes";
+import { GoodreadsYearSelect } from "./GoodreadsYearSelect";
 
 const VARIANTS: Array<{ id: WidgetVariant; label: string }> = [
   { id: "compact", label: "Compact" },
@@ -14,6 +16,7 @@ const selectClassName =
   "rounded-md border border-[#30363d] bg-[#0d1117] px-3 py-2 text-sm text-[#e6edf3] outline-none focus:border-[#39d353] focus:ring-1 focus:ring-[#39d353]";
 
 type OptionControlsProps = {
+  providerId: ProviderId;
   variant: WidgetVariant;
   period: ContributionPeriod;
   theme: ThemeId;
@@ -23,6 +26,7 @@ type OptionControlsProps = {
 };
 
 export function OptionControls({
+  providerId,
   variant,
   period,
   theme,
@@ -30,6 +34,10 @@ export function OptionControls({
   onPeriodChange,
   onThemeChange,
 }: OptionControlsProps) {
+  const periodOptions = getPeriodOptions(providerId);
+  const durationLabel = providerId === "goodreads" ? "Year" : "Duration";
+  const isGoodreads = providerId === "goodreads";
+
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       <div className="flex flex-col gap-2">
@@ -60,22 +68,26 @@ export function OptionControls({
           htmlFor="pulse-period"
           className="text-xs font-medium uppercase tracking-wide text-[#7d8590]"
         >
-          Duration
+          {durationLabel}
         </label>
-        <select
-          id="pulse-period"
-          value={period}
-          onChange={(event) =>
-            onPeriodChange(event.target.value as ContributionPeriod)
-          }
-          className={selectClassName}
-        >
-          {PERIOD_OPTIONS.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+        {isGoodreads ? (
+          <GoodreadsYearSelect value={period} onChange={onPeriodChange} />
+        ) : (
+          <select
+            id="pulse-period"
+            value={period}
+            onChange={(event) =>
+              onPeriodChange(event.target.value as ContributionPeriod)
+            }
+            className={selectClassName}
+          >
+            {periodOptions.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">

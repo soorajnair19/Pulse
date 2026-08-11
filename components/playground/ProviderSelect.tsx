@@ -27,7 +27,9 @@ function hexToRgba(hex: string, alpha: number): string {
 export function ProviderSelect({ value, onChange }: ProviderSelectProps) {
   return (
     <div role="radiogroup" aria-label="Provider" className="flex flex-wrap gap-2">
-      {providers.map((provider) => {
+      {providers
+        .filter((provider) => provider.listed !== false)
+        .map((provider) => {
         const selected = provider.id === value;
         const disabled = !provider.enabled;
 

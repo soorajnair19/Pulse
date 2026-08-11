@@ -51,8 +51,17 @@ export type ContributionData = {
 
 export type WidgetVariant = "compact" | "default" | "detailed";
 
+/** Rolling lookbacks (GitHub / Letterboxd). */
+export type RollingPeriod = "1m" | "3m" | "6m" | "1y";
+
+/**
+ * Calendar year for Goodreads as a four-digit string (e.g. "2018").
+ * Validated at runtime by `isGoodreadsYearPeriod`.
+ */
+export type GoodreadsYearPeriod = string;
+
 /** Contribution calendar lookback presets. */
-export type ContributionPeriod = "1m" | "3m" | "6m" | "1y";
+export type ContributionPeriod = RollingPeriod | GoodreadsYearPeriod;
 
 export type ThemeId =
   | "github-dark"

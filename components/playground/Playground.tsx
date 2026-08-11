@@ -9,7 +9,7 @@ import {
   getSiteOrigin,
   type ProviderId,
 } from "@/lib/providers";
-import { DEFAULT_PERIOD, parsePeriod } from "@/lib/period";
+import { coercePeriodForProvider, parsePeriod } from "@/lib/period";
 import { getTheme } from "@/lib/themes";
 import { ProviderSelect } from "./ProviderSelect";
 import { UsernameForm } from "./UsernameForm";
@@ -55,9 +55,10 @@ export function Playground() {
   const [variant, setVariant] = useState<WidgetVariant>(() =>
     parseVariantParam(searchParams.get("variant"))
   );
-  const [period, setPeriod] = useState<ContributionPeriod>(() =>
-    parsePeriod(searchParams.get("period") ?? DEFAULT_PERIOD)
-  );
+  const [period, setPeriod] = useState<ContributionPeriod>(() => {
+    const provider = getProvider(searchParams.get("provider")).id;
+    return parsePeriod(searchParams.get("period"), provider);
+  });
   const [theme, setTheme] = useState<ThemeId>(() => {
     const fromUrl = searchParams.get("theme");
     return getTheme(fromUrl).id;
@@ -136,11 +137,13 @@ export function Playground() {
   function handleProviderChange(id: ProviderId) {
     setProviderId(id);
     setError(null);
+    const nextPeriod = coercePeriodForProvider(period, id);
+    setPeriod(nextPeriod);
     syncUrl({
       provider: id,
       username: activeByProvider[id] ?? "",
       variant,
-      period,
+      period: nextPeriod,
       theme,
     });
   }
@@ -210,6 +213,7 @@ export function Playground() {
         />
 
         <OptionControls
+          providerId={providerId}
           variant={variant}
           period={period}
           theme={theme}

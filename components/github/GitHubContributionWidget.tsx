@@ -12,9 +12,13 @@ export type WidgetOptions = {
   themeId: string;
   /** Optional brand tint for heatmap cells (e.g. Letterboxd orange). */
   heatmapAccent?: string;
+  /** Optional color for tooltip star ratings (e.g. Letterboxd green). */
+  ratingAccent?: string;
   showLegend: boolean;
   showMonths: boolean;
   showWeekdays: boolean;
+  /** When false, hides current/longest streak (e.g. Goodreads). Default true. */
+  showStreaks?: boolean;
   cellSize: number;
   gap: number;
   radius: number;
@@ -44,9 +48,11 @@ export function GitHubContributionWidget({
     variant,
     themeId,
     heatmapAccent,
+    ratingAccent,
     showLegend,
     showMonths,
     showWeekdays,
+    showStreaks = true,
     cellSize,
     gap,
     radius,
@@ -144,7 +150,7 @@ export function GitHubContributionWidget({
             longestStreak={data.longestStreak}
             totalLabel={totalLabel}
             extraStats={data.extraStats}
-            showStreaks
+            showStreaks={showStreaks}
           />
         </div>
       )}
@@ -158,6 +164,7 @@ export function GitHubContributionWidget({
           showMonths={showMonths}
           showWeekdays={showWeekdays}
           countNoun={data.countNoun}
+          ratingAccent={ratingAccent}
         />
       </div>
 

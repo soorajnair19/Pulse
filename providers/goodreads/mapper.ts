@@ -1,0 +1,145 @@
+import { getPeriodRange } from "@/lib/period";
+import { computeStreaks } from "@/lib/streaks";
+import type {
+  ActivityItem,
+  ContributionData,
+  ContributionDay,
+  ContributionLevel,
+  ContributionPeriod,
+  ContributionWeek,
+} from "@/types";
+import type { GoodreadsShelfEntry } from "./types";
+
+function toDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * Goodreads is finish-date dots, not intensity. Any book that day → brightest cell.
+ * Finishing multiple books on one day is rare; still one bright mark.
+ */
+function countToLevel(count: number): ContributionLevel {
+  return count > 0 ? 4 : 0;
+}
+
+/** Convert a 1–5 rating into a star glyph string (e.g. ★★★★☆). */
+export function formatStarRating(rating: number): string {
+  const clamped = Math.max(0, Math.min(5, Math.round(rating)));
+  return `${"★".repeat(clamped)}${"☆".repeat(5 - clamped)}`;
+}
+
+function buildActivityItem(entry: GoodreadsShelfEntry): ActivityItem {
+  return {
+    title: entry.title,
+    ratingLabel:
+      entry.rating !== null ? formatStarRating(entry.rating) : undefined,
+    url: entry.bookUrl,
+  };
+}
+
+function startOfUtcWeek(date: Date): Date {
+  const day = date.getUTCDay();
+  const start = new Date(date);
+  start.setUTCDate(date.getUTCDate() - day);
+  start.setUTCHours(0, 0, 0, 0);
+  return start;
+}
+
+function buildWeeks(
+  from: Date,
+  to: Date,
+  byDate: Map<string, GoodreadsShelfEntry[]>
+): ContributionWeek[] {
+  const weeks: ContributionWeek[] = [];
+  const cursor = startOfUtcWeek(from);
+  const end = startOfUtcWeek(to);
+
+  while (cursor <= end) {
+    const firstDay = toDateKey(cursor);
+    const contributionDays: ContributionDay[] = [];
+
+    for (let i = 0; i < 7; i += 1) {
+      const day = new Date(cursor);
+      day.setUTCDate(cursor.getUTCDate() + i);
+      const date = toDateKey(day);
+      const entries = byDate.get(date) ?? [];
+      contributionDays.push({
+        date,
+        count: entries.length,
+        level: countToLevel(entries.length),
+        items:
+          entries.length > 0 ? entries.map(buildActivityItem) : undefined,
+      });
+    }
+
+    weeks.push({ firstDay, contributionDays });
+    cursor.setUTCDate(cursor.getUTCDate() + 7);
+  }
+
+  return weeks;
+}
+
+export function mapShelfToContributionData(
+  userId: string,
+  entries: GoodreadsShelfEntry[],
+  period: ContributionPeriod,
+  profile?: { displayName?: string | null; avatarUrl?: string | null }
+): ContributionData {
+  const { from: fromIso, to: toIso } = getPeriodRange(period);
+  const from = new Date(fromIso);
+  from.setUTCHours(0, 0, 0, 0);
+  const to = new Date(toIso);
+  to.setUTCHours(0, 0, 0, 0);
+
+  const fromKey = toDateKey(from);
+  const toKey = toDateKey(to);
+
+  const inWindow = entries.filter(
+    (entry) => entry.date >= fromKey && entry.date <= toKey
+  );
+
+  const byDate = new Map<string, GoodreadsShelfEntry[]>();
+  for (const entry of inWindow) {
+    const list = byDate.get(entry.date) ?? [];
+    list.push(entry);
+    byDate.set(entry.date, list);
+  }
+
+  const weeks = buildWeeks(from, to, byDate);
+  const flatDays = weeks.flatMap((week) => week.contributionDays);
+  const streakDays = flatDays.filter(
+    (day) => day.date >= fromKey && day.date <= toKey
+  );
+  const streaks = computeStreaks(streakDays);
+
+  const rated = inWindow.filter(
+    (e): e is GoodreadsShelfEntry & { rating: number } => e.rating !== null
+  );
+  const averageRating =
+    rated.length > 0
+      ? rated.reduce((sum, e) => sum + e.rating, 0) / rated.length
+      : null;
+
+  return {
+    username: userId,
+    totalContributions: inWindow.length,
+    currentStreak: streaks.currentStreak,
+    longestStreak: streaks.longestStreak,
+    firstContribution: streaks.firstContribution,
+    lastContribution: streaks.lastContribution,
+    avatarUrl: profile?.avatarUrl ?? undefined,
+    name: profile?.displayName ?? null,
+    weeks,
+    totalLabel: "Books Finished",
+    countNoun: {
+      singular: "Book Finished",
+      plural: "Books Finished",
+    },
+    extraStats: [
+      {
+        label: "Average Rating",
+        value: averageRating !== null ? averageRating.toFixed(1) : "—",
+      },
+    ],
+  };
+}

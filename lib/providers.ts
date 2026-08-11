@@ -1,4 +1,8 @@
 import type { ContributionPeriod, ThemeId, WidgetVariant } from "@/types";
+import {
+  isValidGoodreadsUserId,
+  parseGoodreadsUserId,
+} from "@/providers/goodreads/userId";
 
 export type ProviderId = "github" | "letterboxd" | "figma" | "goodreads";
 
@@ -17,6 +21,8 @@ export type PulseProvider = {
   heatmapAccent?: string;
   usernamePlaceholder: string;
   usernameLabel: string;
+  /** When false, the tab is omitted from the playground. */
+  listed?: boolean;
   enabled: boolean;
   validateUsername: (username: string) => string | null;
   buildEmbedPath: (username: string, opts: EmbedOptions) => string;
@@ -87,22 +93,40 @@ export const providers: PulseProvider[] = [
     },
   },
   {
+    id: "goodreads",
+    label: "Goodreads",
+    accent: "#372213",
+    // Brighter than brand brown so finish-date dots stay visible on dark themes.
+    heatmapAccent: "#F4B23E",
+    usernamePlaceholder: "https://www.goodreads.com/review/list/123456",
+    usernameLabel: "Goodreads My Books URL or user ID",
+    enabled: true,
+    validateUsername: (username) => {
+      const trimmed = username.trim();
+      if (!trimmed) return "Enter a Goodreads My Books URL or user ID.";
+      const id = parseGoodreadsUserId(trimmed);
+      if (!id || !isValidGoodreadsUserId(id)) {
+        return "Paste your Goodreads My Books URL or numeric user ID.";
+      }
+      return null;
+    },
+    buildEmbedPath: (username, opts) => {
+      const id = parseGoodreadsUserId(username) ?? username.trim();
+      return `/embed/goodreads/${encodeURIComponent(id)}?${buildQuery(opts)}`;
+    },
+    defaultHeight: {
+      compact: 120,
+      default: 220,
+      detailed: 380,
+    },
+  },
+  {
     id: "figma",
     label: "Figma",
     accent: "#a259ff",
     usernamePlaceholder: "johndoe",
     usernameLabel: "Figma username",
-    enabled: false,
-    validateUsername: () => "Coming soon.",
-    buildEmbedPath: () => "/",
-    defaultHeight: { compact: 120, default: 220, detailed: 380 },
-  },
-  {
-    id: "goodreads",
-    label: "Goodreads",
-    accent: "#372213",
-    usernamePlaceholder: "johndoe",
-    usernameLabel: "Goodreads user ID",
+    listed: false,
     enabled: false,
     validateUsername: () => "Coming soon.",
     buildEmbedPath: () => "/",
