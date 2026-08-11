@@ -8,7 +8,8 @@ type ProviderIconProps = {
 const ICON_SRC: Record<ProviderId, string> = {
   github: "/providers/github.svg",
   figma: "/providers/figma.svg",
-  goodreads: "/providers/goodreads.svg",
+  // Light plate variant — brown g alone disappears on dark tab chrome.
+  goodreads: "/providers/goodreads-light.svg",
   letterboxd: "/providers/letterboxd.svg",
 };
 
