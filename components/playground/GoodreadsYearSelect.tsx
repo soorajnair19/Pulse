@@ -11,10 +11,10 @@ import {
   type KeyboardEvent,
 } from "react";
 import {
-  getGoodreadsRecentYears,
-  GOODREADS_YEAR_MIN,
-  goodreadsYearMax,
-  isGoodreadsYearPeriod,
+  CALENDAR_YEAR_MIN,
+  calendarYearMax,
+  getRecentCalendarYears,
+  isCalendarYearPeriod,
 } from "@/lib/period";
 import { cn } from "@/lib/utils";
 
@@ -37,8 +37,8 @@ export function GoodreadsYearSelect({
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const recentYears = useMemo(() => getGoodreadsRecentYears(), []);
-  const maxYear = goodreadsYearMax();
+  const recentYears = useMemo(() => getRecentCalendarYears(), []);
+  const maxYear = calendarYearMax();
   const isPreset = recentYears.includes(value);
 
   const close = useCallback(() => {
@@ -89,8 +89,8 @@ export function GoodreadsYearSelect({
       setError("Enter a year.");
       return;
     }
-    if (!isGoodreadsYearPeriod(trimmed)) {
-      setError(`Use a year from ${GOODREADS_YEAR_MIN}–${maxYear}.`);
+    if (!isCalendarYearPeriod(trimmed)) {
+      setError(`Use a year from ${CALENDAR_YEAR_MIN}–${maxYear}.`);
       return;
     }
     selectYear(trimmed);
@@ -171,7 +171,7 @@ export function GoodreadsYearSelect({
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={4}
-                placeholder={`${GOODREADS_YEAR_MIN}–${maxYear}`}
+                placeholder={`${CALENDAR_YEAR_MIN}–${maxYear}`}
                 value={draft}
                 onChange={(event) => {
                   setDraft(event.target.value.replace(/\D/g, "").slice(0, 4));

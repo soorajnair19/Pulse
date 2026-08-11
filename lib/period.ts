@@ -1,17 +1,23 @@
 import type {
+  CalendarYearPeriod,
   ContributionPeriod,
-  GoodreadsYearPeriod,
   RollingPeriod,
 } from "@/types";
 import type { ProviderId } from "@/lib/providers";
 
 export const DEFAULT_PERIOD: RollingPeriod = "1y";
 
-/** Earliest year accepted for Goodreads custom / preset selection. */
-export const GOODREADS_YEAR_MIN = 1900;
+/** Earliest year accepted for calendar-year providers. */
+export const CALENDAR_YEAR_MIN = 1900;
 
 /** How many recent calendar years to list above the custom field. */
-export const GOODREADS_RECENT_YEAR_COUNT = 7;
+export const CALENDAR_YEAR_RECENT_COUNT = 7;
+
+/** @deprecated Use CALENDAR_YEAR_MIN. */
+export const GOODREADS_YEAR_MIN = CALENDAR_YEAR_MIN;
+
+/** @deprecated Use CALENDAR_YEAR_RECENT_COUNT. */
+export const GOODREADS_RECENT_YEAR_COUNT = CALENDAR_YEAR_RECENT_COUNT;
 
 export const ROLLING_PERIOD_OPTIONS: Array<{
   id: RollingPeriod;
@@ -26,52 +32,68 @@ export const ROLLING_PERIOD_OPTIONS: Array<{
 /** @deprecated Use ROLLING_PERIOD_OPTIONS or getPeriodOptions(providerId). */
 export const PERIOD_OPTIONS = ROLLING_PERIOD_OPTIONS;
 
-export function goodreadsYearMax(now = new Date()): number {
+export function calendarYearMax(now = new Date()): number {
   return now.getUTCFullYear();
 }
 
-/** Newest → oldest recent years for the Goodreads dropdown. */
-export function getGoodreadsRecentYears(
-  count = GOODREADS_RECENT_YEAR_COUNT,
+/** @deprecated Use calendarYearMax. */
+export const goodreadsYearMax = calendarYearMax;
+
+/** Newest → oldest recent years for the calendar-year dropdown. */
+export function getRecentCalendarYears(
+  count = CALENDAR_YEAR_RECENT_COUNT,
   now = new Date()
-): GoodreadsYearPeriod[] {
-  const max = goodreadsYearMax(now);
-  const years: GoodreadsYearPeriod[] = [];
+): CalendarYearPeriod[] {
+  const max = calendarYearMax(now);
+  const years: CalendarYearPeriod[] = [];
   for (let i = 0; i < count; i += 1) {
     const year = max - i;
-    if (year < GOODREADS_YEAR_MIN) break;
+    if (year < CALENDAR_YEAR_MIN) break;
     years.push(String(year));
   }
   return years;
 }
 
-/** @deprecated Prefer getGoodreadsRecentYears(). */
-export const GOODREADS_YEAR_PERIODS = getGoodreadsRecentYears();
+/** @deprecated Prefer getRecentCalendarYears(). */
+export const getGoodreadsRecentYears = getRecentCalendarYears;
+
+/** @deprecated Prefer getRecentCalendarYears(). */
+export const GOODREADS_YEAR_PERIODS = getRecentCalendarYears();
 
 export function isRollingPeriod(value: string): value is RollingPeriod {
   return value === "1m" || value === "3m" || value === "6m" || value === "1y";
 }
 
-export function isGoodreadsYearPeriod(
+export function isCalendarYearPeriod(
   value: string
-): value is GoodreadsYearPeriod {
+): value is CalendarYearPeriod {
   if (!/^\d{4}$/.test(value)) return false;
   const year = Number.parseInt(value, 10);
-  return year >= GOODREADS_YEAR_MIN && year <= goodreadsYearMax();
+  return year >= CALENDAR_YEAR_MIN && year <= calendarYearMax();
 }
 
-export function currentGoodreadsYearPeriod(
+/** @deprecated Use isCalendarYearPeriod. */
+export const isGoodreadsYearPeriod = isCalendarYearPeriod;
+
+export function currentCalendarYearPeriod(
   now = new Date()
-): GoodreadsYearPeriod {
-  return String(goodreadsYearMax(now));
+): CalendarYearPeriod {
+  return String(calendarYearMax(now));
+}
+
+/** @deprecated Use currentCalendarYearPeriod. */
+export const currentGoodreadsYearPeriod = currentCalendarYearPeriod;
+
+function usesCalendarYear(providerId: ProviderId): boolean {
+  return providerId === "goodreads" || providerId === "letterboxd";
 }
 
 export function getPeriodOptions(providerId: ProviderId): Array<{
   id: ContributionPeriod;
   label: string;
 }> {
-  if (providerId === "goodreads") {
-    return getGoodreadsRecentYears().map((year) => ({
+  if (usesCalendarYear(providerId)) {
+    return getRecentCalendarYears().map((year) => ({
       id: year,
       label: year,
     }));
@@ -82,7 +104,7 @@ export function getPeriodOptions(providerId: ProviderId): Array<{
 export function defaultPeriodForProvider(
   providerId: ProviderId
 ): ContributionPeriod {
-  if (providerId === "goodreads") return currentGoodreadsYearPeriod();
+  if (usesCalendarYear(providerId)) return currentCalendarYearPeriod();
   return DEFAULT_PERIOD;
 }
 
@@ -94,10 +116,10 @@ export function coercePeriodForProvider(
   period: ContributionPeriod | string,
   providerId: ProviderId
 ): ContributionPeriod {
-  if (providerId === "goodreads") {
-    return isGoodreadsYearPeriod(period)
+  if (usesCalendarYear(providerId)) {
+    return isCalendarYearPeriod(period)
       ? period
-      : currentGoodreadsYearPeriod();
+      : currentCalendarYearPeriod();
   }
   return isRollingPeriod(period) ? period : DEFAULT_PERIOD;
 }
@@ -113,16 +135,16 @@ export function parsePeriod(
       : DEFAULT_PERIOD;
   }
 
-  if (providerId === "goodreads") {
-    return isGoodreadsYearPeriod(raw)
+  if (providerId && usesCalendarYear(providerId)) {
+    return isCalendarYearPeriod(raw)
       ? raw
-      : currentGoodreadsYearPeriod();
+      : currentCalendarYearPeriod();
   }
 
   if (isRollingPeriod(raw)) return raw;
 
-  // Year periods are only meaningful for Goodreads; ignore elsewhere.
-  if (providerId === undefined && isGoodreadsYearPeriod(raw)) {
+  // Year periods when provider is unspecified (shared ContributionPeriod parsing).
+  if (providerId === undefined && isCalendarYearPeriod(raw)) {
     return raw;
   }
 
@@ -136,7 +158,7 @@ export function getPeriodRange(period: ContributionPeriod): {
   from: string;
   to: string;
 } {
-  if (isGoodreadsYearPeriod(period) && !isRollingPeriod(period)) {
+  if (isCalendarYearPeriod(period) && !isRollingPeriod(period)) {
     const year = Number.parseInt(period, 10);
     const from = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
     const to = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));

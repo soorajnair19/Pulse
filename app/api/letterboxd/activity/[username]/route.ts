@@ -22,7 +22,10 @@ export async function GET(
   context: RouteContext
 ): Promise<NextResponse> {
   const { username } = await context.params;
-  const period = parsePeriod(new URL(request.url).searchParams.get("period"));
+  const period = parsePeriod(
+    new URL(request.url).searchParams.get("period"),
+    "letterboxd"
+  );
 
   if (!username || !LETTERBOXD_USERNAME_RE.test(username)) {
     const body: ApiErrorBody = {

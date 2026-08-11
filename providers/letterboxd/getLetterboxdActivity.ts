@@ -1,4 +1,4 @@
-import { parsePeriod } from "@/lib/period";
+import { currentCalendarYearPeriod, parsePeriod } from "@/lib/period";
 import type { ContributionData, ContributionPeriod } from "@/types";
 import { fetchDiary } from "./fetchDiary";
 import { mapDiaryToContributionData } from "./mapper";
@@ -9,9 +9,9 @@ import { mapDiaryToContributionData } from "./mapper";
  */
 export async function getLetterboxdActivity(
   username: string,
-  period: ContributionPeriod = "1y"
+  period: ContributionPeriod = currentCalendarYearPeriod()
 ): Promise<ContributionData> {
-  const resolvedPeriod = parsePeriod(period);
+  const resolvedPeriod = parsePeriod(period, "letterboxd");
   const diary = await fetchDiary(username);
   return mapDiaryToContributionData(
     diary.username,

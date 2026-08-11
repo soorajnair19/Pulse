@@ -35,8 +35,9 @@ export function OptionControls({
   onThemeChange,
 }: OptionControlsProps) {
   const periodOptions = getPeriodOptions(providerId);
-  const durationLabel = providerId === "goodreads" ? "Year" : "Duration";
-  const isGoodreads = providerId === "goodreads";
+  const usesYearSelect =
+    providerId === "goodreads" || providerId === "letterboxd";
+  const durationLabel = usesYearSelect ? "Year" : "Duration";
 
   return (
     <div className="grid gap-4 sm:grid-cols-3">
@@ -70,7 +71,7 @@ export function OptionControls({
         >
           {durationLabel}
         </label>
-        {isGoodreads ? (
+        {usesYearSelect ? (
           <GoodreadsYearSelect value={period} onChange={onPeriodChange} />
         ) : (
           <select

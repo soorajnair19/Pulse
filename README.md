@@ -30,7 +30,7 @@ Coming later: Figma.
 ## Customize
 
 - **Size** — Compact, Default, or Detailed
-- **Duration** — Last month, 3 months, 6 months, or a full year (GitHub / Letterboxd). Goodreads uses a calendar year (pick a recent year or enter a custom one).
+- **Duration** — Last month, 3 months, 6 months, or a full year (GitHub). Letterboxd and Goodreads use a calendar year (pick a recent year or enter a custom one).
 - **Theme** — Dark, Light, Minimal, Glass, Violet, Arctic, Twilight, Pastel
 
 Switch between providers anytime — each one remembers its own username and preview.

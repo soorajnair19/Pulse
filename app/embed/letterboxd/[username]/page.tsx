@@ -69,7 +69,7 @@ export default async function LetterboxdEmbedPage({
   const query = await searchParams;
 
   const variant = parseVariant(query.variant);
-  const period = parsePeriod(query.period);
+  const period = parsePeriod(query.period, "letterboxd");
   const themeId = typeof query.theme === "string" ? query.theme : "github-dark";
   const theme = getTheme(themeId);
 
