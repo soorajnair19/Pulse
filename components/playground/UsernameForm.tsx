@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties, type FormEvent } from "react";
-import { lightenHex, type PulseProvider } from "@/lib/providers";
+import { isLightHex, lightenHex, type PulseProvider } from "@/lib/providers";
 
 type UsernameFormProps = {
   provider: PulseProvider;
@@ -28,6 +28,7 @@ export function UsernameForm({
 
   const accent = provider.accent;
   const accentHover = lightenHex(accent, 0.14);
+  const onLightAccent = isLightHex(accent);
 
   const inputStyle: CSSProperties = focused
     ? {
@@ -62,10 +63,11 @@ export function UsernameForm({
         />
         <button
           type="submit"
-          className="shrink-0 rounded-md px-5 py-2.5 text-sm font-medium text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="shrink-0 rounded-md px-5 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           style={{
             backgroundColor: hovered ? accentHover : accent,
             outlineColor: accent,
+            color: onLightAccent ? "#1a1210" : "#ffffff",
           }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}

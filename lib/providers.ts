@@ -102,7 +102,7 @@ export const providers: PulseProvider[] = [
   {
     id: "goodreads",
     label: "Goodreads",
-    accent: "#372213",
+    accent: "#EBE2D7",
     // Brighter than brand brown so finish-date dots stay visible on dark themes.
     heatmapAccent: "#F4B23E",
     usernamePlaceholder: "https://www.goodreads.com/review/list/123456",
@@ -206,6 +206,20 @@ export function buildEmbedSnippet(
 
 /** Slightly lighten a hex color for hover states. */
 export function lightenHex(hex: string, amount = 0.12): string {
+  const [r, g, b] = parseHexRgb(hex);
+  const mix = (channel: number) =>
+    Math.min(255, Math.round(channel + (255 - channel) * amount));
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+}
+
+/** True when hex is light enough that dark text reads better than white. */
+export function isLightHex(hex: string): boolean {
+  const [r, g, b] = parseHexRgb(hex);
+  // Relative luminance (sRGB) — threshold tuned for CTA text contrast.
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.55;
+}
+
+function parseHexRgb(hex: string): [number, number, number] {
   const normalized = hex.replace("#", "");
   const full =
     normalized.length === 3
@@ -214,10 +228,9 @@ export function lightenHex(hex: string, amount = 0.12): string {
           .map((c) => c + c)
           .join("")
       : normalized;
-  const r = Number.parseInt(full.slice(0, 2), 16);
-  const g = Number.parseInt(full.slice(2, 4), 16);
-  const b = Number.parseInt(full.slice(4, 6), 16);
-  const mix = (channel: number) =>
-    Math.min(255, Math.round(channel + (255 - channel) * amount));
-  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+  return [
+    Number.parseInt(full.slice(0, 2), 16),
+    Number.parseInt(full.slice(2, 4), 16),
+    Number.parseInt(full.slice(4, 6), 16),
+  ];
 }
