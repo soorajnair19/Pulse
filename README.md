@@ -25,7 +25,6 @@ That’s it. No account required.
 
 **Goodreads setup:** paste a public My Books URL like `https://www.goodreads.com/review/list/123456`, or just the numeric user ID.
 
-Coming later: Figma.
 
 ## Customize
 
