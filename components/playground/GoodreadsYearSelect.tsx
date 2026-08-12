@@ -10,6 +10,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   CALENDAR_YEAR_MIN,
   calendarYearMax,
@@ -19,7 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const triggerClassName =
-  "flex w-full items-center justify-between rounded-md border border-[#30363d] bg-[#0d1117] px-3 py-2 text-sm text-[#e6edf3] outline-none focus:border-[#39d353] focus:ring-1 focus:ring-[#39d353]";
+  "flex w-full items-center justify-between gap-2 rounded-md border border-[#30363d] bg-[#0d1117] py-2 pl-3 pr-3 text-sm text-[#e6edf3] outline-none focus:border-[#39d353] focus:ring-1 focus:ring-[#39d353]";
 
 type GoodreadsYearSelectProps = {
   value: string;
@@ -121,9 +122,11 @@ export function GoodreadsYearSelect({
         className={triggerClassName}
       >
         <span>{value}</span>
-        <span className="text-[#7d8590]" aria-hidden>
-          ▾
-        </span>
+        <ChevronDown
+          className="size-4 shrink-0 text-[#7d8590]"
+          strokeWidth={2}
+          aria-hidden
+        />
       </button>
 
       {open && (

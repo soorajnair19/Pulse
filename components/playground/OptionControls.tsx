@@ -12,8 +12,15 @@ const VARIANTS: Array<{ id: WidgetVariant; label: string }> = [
   { id: "detailed", label: "Detailed" },
 ];
 
+/** Matches Lucide ChevronDown at 16px / #7d8590 so native <select>s match GoodreadsYearSelect. */
+const SELECT_CHEVRON = `url("data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7d8590" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
+)}")`;
+
 const selectClassName =
-  "rounded-md border border-[#30363d] bg-[#0d1117] px-3 py-2 text-sm text-[#e6edf3] outline-none focus:border-[#39d353] focus:ring-1 focus:ring-[#39d353]";
+  "w-full appearance-none rounded-md border border-[#30363d] bg-[#0d1117] bg-[length:1rem] bg-[position:right_0.75rem_center] bg-no-repeat py-2 pl-3 pr-9 text-sm text-[#e6edf3] outline-none focus:border-[#39d353] focus:ring-1 focus:ring-[#39d353]";
+
+const selectStyle = { backgroundImage: SELECT_CHEVRON } as const;
 
 type OptionControlsProps = {
   providerId: ProviderId;
@@ -55,6 +62,7 @@ export function OptionControls({
             onVariantChange(event.target.value as WidgetVariant)
           }
           className={selectClassName}
+          style={selectStyle}
         >
           {VARIANTS.map((item) => (
             <option key={item.id} value={item.id}>
@@ -81,6 +89,7 @@ export function OptionControls({
               onPeriodChange(event.target.value as ContributionPeriod)
             }
             className={selectClassName}
+            style={selectStyle}
           >
             {periodOptions.map((item) => (
               <option key={item.id} value={item.id}>
@@ -103,6 +112,7 @@ export function OptionControls({
           value={theme}
           onChange={(event) => onThemeChange(event.target.value as ThemeId)}
           className={selectClassName}
+          style={selectStyle}
         >
           {Object.values(themes).map((item) => (
             <option key={item.id} value={item.id}>
