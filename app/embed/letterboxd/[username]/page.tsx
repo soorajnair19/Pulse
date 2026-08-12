@@ -9,6 +9,7 @@ import {
   parseNumberParam,
   parseVariant,
 } from "@/lib/utils";
+import { parseVisualization } from "@/lib/visualizations";
 import type { Metadata } from "next";
 
 /** 24 hours — must be a literal for Next.js segment config. */
@@ -70,6 +71,7 @@ export default async function LetterboxdEmbedPage({
 
   const variant = parseVariant(query.variant);
   const period = parsePeriod(query.period, "letterboxd");
+  const visualization = parseVisualization(query.visualization, "letterboxd");
   const themeId = typeof query.theme === "string" ? query.theme : "github-dark";
   const theme = getTheme(themeId);
 
@@ -97,6 +99,7 @@ export default async function LetterboxdEmbedPage({
         options={{
           variant,
           themeId: theme.id,
+          visualization,
           heatmapAccent: "#FF8001",
           ratingAccent: "#00E054",
           showLegend,

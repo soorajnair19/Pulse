@@ -7,12 +7,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Embed layout: widget-only surface — no chrome, no scroll, no margins.
+ * Embed layout: widget-only surface — no chrome, no margins.
+ * Height grows with content (e.g. Letterboxd filmstrip) so hosts / playground
+ * can size the iframe to fit without clipping.
  */
 export default function EmbedLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="pulse-embed-root h-full w-full overflow-hidden">
-      {children}
-    </div>
-  );
+  return <div className="pulse-embed-root w-full">{children}</div>;
 }

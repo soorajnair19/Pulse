@@ -5,6 +5,12 @@ export type ActivityItem = {
   ratingLabel?: string;
   url?: string;
   liked?: boolean;
+  /** Poster / cover image URL (Letterboxd, Goodreads). */
+  posterUrl?: string;
+  /** ISO date the item was logged / finished (YYYY-MM-DD). */
+  date?: string;
+  /** Release / publication year when known. */
+  year?: number;
 };
 
 export type ActivityStat = {
@@ -69,7 +75,11 @@ export type ContributionData = {
 export type WidgetVariant = "compact" | "default" | "detailed";
 
 /** Widget body renderer — heatmap is the classic default. */
-export type WidgetVisualization = "heatmap" | "pulse" | "orbit";
+export type WidgetVisualization =
+  | "heatmap"
+  | "pulse"
+  | "orbit"
+  | "filmstrip";
 
 /** Rolling lookbacks (GitHub). */
 export type RollingPeriod = "1m" | "3m" | "6m" | "1y";

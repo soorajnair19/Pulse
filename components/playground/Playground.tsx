@@ -83,16 +83,26 @@ export function Playground() {
   const [error, setError] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
   const [previewReady, setPreviewReady] = useState(false);
+  const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const provider = useMemo(() => getProvider(providerId), [providerId]);
   const handlePreviewLoadChange = useCallback((loaded: boolean) => {
     setPreviewReady(loaded);
+    if (!loaded) setMeasuredHeight(null);
+  }, []);
+
+  const handlePreviewHeightChange = useCallback((next: number) => {
+    setMeasuredHeight(next);
   }, []);
 
   useEffect(() => {
     setOrigin(getSiteOrigin());
   }, []);
+
+  useEffect(() => {
+    setMeasuredHeight(null);
+  }, [visualization, variant, period, providerId, activeUsername]);
 
   const syncUrl = useCallback(
     (next: {
@@ -126,7 +136,12 @@ export function Playground() {
       : null;
 
   const previewSrc = embedPath ? embedPath : null;
-  const height = getEmbedHeight(provider, variant, visualization);
+  const baseHeight = getEmbedHeight(provider, variant, visualization);
+  const autoHeight = visualization === "filmstrip";
+  const height =
+    autoHeight && measuredHeight != null
+      ? Math.max(baseHeight, measuredHeight)
+      : baseHeight;
 
   const embedCode =
     origin && embedPath
@@ -270,9 +285,11 @@ export function Playground() {
         ref={iframeRef}
         cacheKey={providerId}
         src={previewSrc}
-        height={height}
+        height={baseHeight}
+        autoHeight={autoHeight}
         title={`${provider.label} widget preview`}
         onLoadChange={handlePreviewLoadChange}
+        onHeightChange={handlePreviewHeightChange}
       />
 
       <WidgetActions

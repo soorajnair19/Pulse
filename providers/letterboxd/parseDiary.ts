@@ -86,12 +86,20 @@ function parsePoster($row: CheerioEl): string | null {
   const candidates = [
     poster.attr("data-poster-url"),
     poster.attr("data-image-url"),
+    poster.attr("data-src"),
+    poster.attr("data-full-src"),
     poster.attr("src"),
+    poster.find("img").attr("data-src"),
     poster.find("img").attr("src"),
   ];
   for (const candidate of candidates) {
     const url = absoluteUrl(candidate ?? null);
-    if (url && !url.includes("empty-poster") && !url.includes("avatar")) {
+    if (
+      url &&
+      !url.includes("empty-poster") &&
+      !url.includes("avatar") &&
+      !url.includes("data:image")
+    ) {
       return url.replace(/-0-(\d+)-0-(\d+)-crop/, "-0-150-0-225-crop");
     }
   }
@@ -283,7 +291,13 @@ export function parseRssFeed(xml: string): LetterboxdRssParseResult {
 
     const description = $item.find("description").first().text();
     const posterMatch = description.match(/src=["']([^"']+)["']/i);
-    const posterUrl = posterMatch ? absoluteUrl(posterMatch[1]) : null;
+    let posterUrl = posterMatch ? absoluteUrl(posterMatch[1]) : null;
+    if (posterUrl) {
+      posterUrl = posterUrl.replace(
+        /-0-(\d+)-0-(\d+)-crop/,
+        "-0-150-0-225-crop"
+      );
+    }
 
     entries.push({
       title,

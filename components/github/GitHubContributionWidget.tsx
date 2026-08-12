@@ -1,11 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import type {
   ContributionData,
   WidgetVariant,
   WidgetVisualization,
 } from "@/types";
-import { formatActivityCount } from "@/lib/utils";
+import { flattenDiaryItems } from "@/lib/diary-items";
+import { estimateFilmstripHeight } from "@/lib/filmstrip-layout";
+import { cn, formatActivityCount } from "@/lib/utils";
+import { PosterFilmstrip } from "@/components/letterboxd/PosterFilmstrip";
 import { ContributionHeatmap } from "./ContributionHeatmap";
 import { Legend } from "./Legend";
 import { PulseECG } from "./PulseECG";
@@ -38,7 +42,8 @@ type GitHubContributionWidgetProps = {
 
 function widgetMinHeight(
   variant: WidgetVariant,
-  visualization: WidgetVisualization
+  visualization: WidgetVisualization,
+  filmCount = 0
 ): number {
   if (visualization === "orbit") {
     switch (variant) {
@@ -49,6 +54,9 @@ function widgetMinHeight(
       default:
         return 300;
     }
+  }
+  if (visualization === "filmstrip") {
+    return estimateFilmstripHeight(filmCount, variant);
   }
   switch (variant) {
     case "compact":
@@ -65,6 +73,9 @@ function widgetPadding(
   visualization: WidgetVisualization
 ): string {
   if (visualization === "orbit" && variant !== "compact") {
+    return variant === "detailed" ? "18px 18px 16px 16px" : "16px 16px 14px 16px";
+  }
+  if (visualization === "filmstrip" && variant !== "compact") {
     return variant === "detailed" ? "18px 18px 16px 16px" : "16px 16px 14px 16px";
   }
   if (variant === "compact") return "12px 14px";
@@ -91,7 +102,19 @@ export function GitHubContributionWidget({
     radius,
   } = options;
 
-  const minHeight = widgetMinHeight(variant, visualization);
+  const diaryItems = useMemo(() => {
+    if (visualization !== "filmstrip") {
+      return [];
+    }
+    return flattenDiaryItems(data.weeks);
+  }, [data.weeks, visualization]);
+
+  const isFilmstrip = visualization === "filmstrip";
+  const minHeight = widgetMinHeight(
+    variant,
+    visualization,
+    diaryItems.length
+  );
   const totalLabel = data.totalLabel ?? "Contributions";
   const hasProfileStats =
     data.followers !== undefined || data.publicRepos !== undefined;
@@ -101,7 +124,12 @@ export function GitHubContributionWidget({
     <ThemeProvider
       themeId={themeId}
       heatmapAccent={heatmapAccent}
-      className="pulse-widget box-border flex h-full w-full flex-col justify-between overflow-hidden font-sans antialiased"
+      className={cn(
+        "pulse-widget box-border flex w-full flex-col font-sans antialiased",
+        isFilmstrip
+          ? "h-auto overflow-visible"
+          : "h-full justify-between overflow-hidden"
+      )}
       style={{
         minHeight,
         padding: widgetPadding(variant, visualization),
@@ -184,7 +212,7 @@ export function GitHubContributionWidget({
         </div>
       )}
 
-      <div className="min-h-0 flex-1">
+      <div className={isFilmstrip ? "w-full" : "min-h-0 flex-1"}>
         {visualization === "pulse" ? (
           <PulseECG
             weeks={data.weeks}
@@ -197,6 +225,12 @@ export function GitHubContributionWidget({
             avatarUrl={data.avatarUrl}
             username={data.username}
             variant={variant}
+          />
+        ) : visualization === "filmstrip" ? (
+          <PosterFilmstrip
+            items={diaryItems}
+            variant={variant}
+            ratingAccent={ratingAccent}
           />
         ) : (
           <ContributionHeatmap

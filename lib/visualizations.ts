@@ -10,11 +10,12 @@ const ALL_VISUALIZATIONS: VisualizationOption[] = [
   { id: "heatmap", label: "Classic" },
   { id: "pulse", label: "Pulse" },
   { id: "orbit", label: "Orbit" },
+  { id: "filmstrip", label: "Filmstrip" },
 ];
 
 const BY_PROVIDER: Record<ProviderId, WidgetVisualization[]> = {
   github: ["heatmap", "pulse", "orbit"],
-  letterboxd: ["heatmap"],
+  letterboxd: ["heatmap", "filmstrip"],
   goodreads: ["heatmap"],
   figma: ["heatmap"],
 };
@@ -29,7 +30,12 @@ export function getVisualizations(
 export function isWidgetVisualization(
   value: string
 ): value is WidgetVisualization {
-  return value === "heatmap" || value === "pulse" || value === "orbit";
+  return (
+    value === "heatmap" ||
+    value === "pulse" ||
+    value === "orbit" ||
+    value === "filmstrip"
+  );
 }
 
 export function isVisualizationSupported(
