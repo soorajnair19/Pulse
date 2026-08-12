@@ -11,6 +11,12 @@ export type ActivityItem = {
   date?: string;
   /** Release / publication year when known. */
   year?: number;
+  /** Author name (Goodreads). */
+  author?: string;
+  /** Numeric star rating 1–5 (Goodreads shelf spines). */
+  rating?: number;
+  /** Page count when known — maps to spine thickness (Goodreads). */
+  pageCount?: number;
 };
 
 export type ActivityStat = {
@@ -66,6 +72,8 @@ export type ContributionData = {
   totalLabel?: string;
   /** Tooltip/count copy — defaults to contribution(s). */
   countNoun?: CountNoun;
+  /** Stats shown before the primary total (e.g. selected Year). */
+  leadingStats?: ActivityStat[];
   /** Extra stats beyond total + streaks (e.g. Average Rating, Rewatches). */
   extraStats?: ActivityStat[];
   /** Repos with commit contributions in the period (GitHub Orbit). */
@@ -79,7 +87,8 @@ export type WidgetVisualization =
   | "heatmap"
   | "pulse"
   | "orbit"
-  | "filmstrip";
+  | "filmstrip"
+  | "shelf";
 
 /** Rolling lookbacks (GitHub). */
 export type RollingPeriod = "1m" | "3m" | "6m" | "1y";

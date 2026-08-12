@@ -9,6 +9,7 @@ import {
   parseNumberParam,
   parseVariant,
 } from "@/lib/utils";
+import { parseVisualization } from "@/lib/visualizations";
 import type { Metadata } from "next";
 
 /** 24 hours — must be a literal for Next.js segment config. */
@@ -73,6 +74,7 @@ export default async function GoodreadsEmbedPage({
 
   const variant = parseVariant(query.variant);
   const period = parsePeriod(query.period, "goodreads");
+  const visualization = parseVisualization(query.visualization, "goodreads");
   const themeId = typeof query.theme === "string" ? query.theme : "github-dark";
   const theme = getTheme(themeId);
 
@@ -98,6 +100,7 @@ export default async function GoodreadsEmbedPage({
         options={{
           variant,
           themeId: theme.id,
+          visualization,
           heatmapAccent: GOODREADS_HEATMAP_ACCENT,
           ratingAccent: GOODREADS_RATING_ACCENT,
           showLegend,

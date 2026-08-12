@@ -7,7 +7,25 @@ const ALLOWED_HOSTS = new Set([
   "s.ltrbxd.com",
   "www.letterboxd.com",
   "letterboxd.com",
+  "i.gr-assets.com",
+  "images.gr-assets.com",
+  "s.gr-assets.com",
+  "www.goodreads.com",
 ]);
+
+const GOODREADS_HOSTS = new Set([
+  "i.gr-assets.com",
+  "images.gr-assets.com",
+  "s.gr-assets.com",
+  "www.goodreads.com",
+]);
+
+function refererForHost(hostname: string): string {
+  if (GOODREADS_HOSTS.has(hostname)) {
+    return "https://www.goodreads.com/";
+  }
+  return "https://letterboxd.com/";
+}
 
 export const runtime = "nodejs";
 export const revalidate = 86400;
@@ -24,9 +42,9 @@ function isAllowedUrl(raw: string): URL | null {
 }
 
 /**
- * Same-origin proxy for Letterboxd poster images.
- * Needed so the playground can display posters and export them to PNG
- * (a.ltrbxd.com does not send CORS headers for canvas/html-to-image).
+ * Same-origin proxy for third-party poster/cover images.
+ * Needed so the playground can display images and export them to PNG
+ * (upstream CDNs do not send CORS headers for canvas/html-to-image).
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -46,7 +64,7 @@ export async function GET(request: Request) {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
         Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
-        Referer: "https://letterboxd.com/",
+        Referer: refererForHost(target.hostname),
       },
       next: { revalidate: 86400 },
     });

@@ -162,6 +162,13 @@ const FILMSTRIP_EMBED_HEIGHT: Record<WidgetVariant, number> = {
   detailed: 480,
 };
 
+/** Shelf grows with book count; this is a floor until content is measured. */
+const SHELF_EMBED_HEIGHT: Record<WidgetVariant, number> = {
+  compact: 200,
+  default: 360,
+  detailed: 480,
+};
+
 export function getEmbedHeight(
   provider: PulseProvider,
   variant: WidgetVariant,
@@ -172,6 +179,9 @@ export function getEmbedHeight(
   }
   if (visualization === "filmstrip") {
     return FILMSTRIP_EMBED_HEIGHT[variant];
+  }
+  if (visualization === "shelf") {
+    return SHELF_EMBED_HEIGHT[variant];
   }
   return provider.defaultHeight[variant];
 }

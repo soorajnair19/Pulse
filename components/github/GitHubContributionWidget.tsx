@@ -8,7 +8,9 @@ import type {
 } from "@/types";
 import { flattenDiaryItems } from "@/lib/diary-items";
 import { estimateFilmstripHeight } from "@/lib/filmstrip-layout";
+import { estimateShelfHeight } from "@/lib/shelf-layout";
 import { cn, formatActivityCount } from "@/lib/utils";
+import { BookShelf } from "@/components/goodreads/BookShelf";
 import { PosterFilmstrip } from "@/components/letterboxd/PosterFilmstrip";
 import { ContributionHeatmap } from "./ContributionHeatmap";
 import { Legend } from "./Legend";
@@ -43,7 +45,7 @@ type GitHubContributionWidgetProps = {
 function widgetMinHeight(
   variant: WidgetVariant,
   visualization: WidgetVisualization,
-  filmCount = 0
+  itemCount = 0
 ): number {
   if (visualization === "orbit") {
     switch (variant) {
@@ -56,7 +58,10 @@ function widgetMinHeight(
     }
   }
   if (visualization === "filmstrip") {
-    return estimateFilmstripHeight(filmCount, variant);
+    return estimateFilmstripHeight(itemCount, variant);
+  }
+  if (visualization === "shelf") {
+    return estimateShelfHeight(itemCount, variant);
   }
   switch (variant) {
     case "compact":
@@ -76,6 +81,9 @@ function widgetPadding(
     return variant === "detailed" ? "18px 18px 16px 16px" : "16px 16px 14px 16px";
   }
   if (visualization === "filmstrip" && variant !== "compact") {
+    return variant === "detailed" ? "18px 18px 16px 16px" : "16px 16px 14px 16px";
+  }
+  if (visualization === "shelf" && variant !== "compact") {
     return variant === "detailed" ? "18px 18px 16px 16px" : "16px 16px 14px 16px";
   }
   if (variant === "compact") return "12px 14px";
@@ -102,18 +110,19 @@ export function GitHubContributionWidget({
     radius,
   } = options;
 
-  const diaryItems = useMemo(() => {
-    if (visualization !== "filmstrip") {
+  const listItems = useMemo(() => {
+    if (visualization !== "filmstrip" && visualization !== "shelf") {
       return [];
     }
     return flattenDiaryItems(data.weeks);
   }, [data.weeks, visualization]);
 
-  const isFilmstrip = visualization === "filmstrip";
+  const isAutoHeight =
+    visualization === "filmstrip" || visualization === "shelf";
   const minHeight = widgetMinHeight(
     variant,
     visualization,
-    diaryItems.length
+    listItems.length
   );
   const totalLabel = data.totalLabel ?? "Contributions";
   const hasProfileStats =
@@ -126,7 +135,7 @@ export function GitHubContributionWidget({
       heatmapAccent={heatmapAccent}
       className={cn(
         "pulse-widget box-border flex w-full flex-col font-sans antialiased",
-        isFilmstrip
+        isAutoHeight
           ? "h-auto overflow-visible"
           : "h-full justify-between overflow-hidden"
       )}
@@ -206,13 +215,14 @@ export function GitHubContributionWidget({
             currentStreak={data.currentStreak}
             longestStreak={data.longestStreak}
             totalLabel={totalLabel}
+            leadingStats={data.leadingStats}
             extraStats={data.extraStats}
             showStreaks={showStreaks}
           />
         </div>
       )}
 
-      <div className={isFilmstrip ? "w-full" : "min-h-0 flex-1"}>
+      <div className={isAutoHeight ? "w-full" : "min-h-0 flex-1"}>
         {visualization === "pulse" ? (
           <PulseECG
             weeks={data.weeks}
@@ -228,7 +238,13 @@ export function GitHubContributionWidget({
           />
         ) : visualization === "filmstrip" ? (
           <PosterFilmstrip
-            items={diaryItems}
+            items={listItems}
+            variant={variant}
+            ratingAccent={ratingAccent}
+          />
+        ) : visualization === "shelf" ? (
+          <BookShelf
+            items={listItems}
             variant={variant}
             ratingAccent={ratingAccent}
           />

@@ -1,7 +1,8 @@
-import { getPeriodRange } from "@/lib/period";
+import { getPeriodRange, isCalendarYearPeriod } from "@/lib/period";
 import { computeStreaks } from "@/lib/streaks";
 import type {
   ActivityItem,
+  ActivityStat,
   ContributionData,
   ContributionDay,
   ContributionLevel,
@@ -127,6 +128,10 @@ export function mapDiaryToContributionData(
       : null;
   const rewatches = inWindow.filter((e) => e.rewatch).length;
 
+  const leadingStats: ActivityStat[] | undefined = isCalendarYearPeriod(period)
+    ? [{ label: "Year", value: period }]
+    : undefined;
+
   return {
     username,
     totalContributions: inWindow.length,
@@ -142,6 +147,7 @@ export function mapDiaryToContributionData(
       singular: "Film Logged",
       plural: "Films Logged",
     },
+    leadingStats,
     extraStats: [
       {
         label: "Average Rating",

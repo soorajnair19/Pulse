@@ -8,6 +8,7 @@ type StatsBarProps = {
   longestStreak: number;
   showStreaks?: boolean;
   totalLabel?: string;
+  leadingStats?: ActivityStat[];
   extraStats?: ActivityStat[];
 };
 
@@ -39,10 +40,14 @@ export function StatsBar({
   longestStreak,
   showStreaks = true,
   totalLabel = "Contributions",
+  leadingStats,
   extraStats,
 }: StatsBarProps) {
   return (
     <div className="flex items-end gap-6 flex-wrap">
+      {leadingStats?.map((stat) => (
+        <Stat key={stat.label} label={stat.label} value={stat.value} />
+      ))}
       <Stat label={totalLabel} value={totalContributions} />
       {showStreaks && (
         <>

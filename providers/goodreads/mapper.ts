@@ -1,7 +1,8 @@
-import { getPeriodRange } from "@/lib/period";
+import { getPeriodRange, isCalendarYearPeriod } from "@/lib/period";
 import { computeStreaks } from "@/lib/streaks";
 import type {
   ActivityItem,
+  ActivityStat,
   ContributionData,
   ContributionDay,
   ContributionLevel,
@@ -34,6 +35,10 @@ function buildActivityItem(entry: GoodreadsShelfEntry): ActivityItem {
     ratingLabel:
       entry.rating !== null ? formatStarRating(entry.rating) : undefined,
     url: entry.bookUrl,
+    posterUrl: entry.coverUrl ?? undefined,
+    author: entry.author ?? undefined,
+    rating: entry.rating ?? undefined,
+    date: entry.date,
   };
 }
 
@@ -120,6 +125,10 @@ export function mapShelfToContributionData(
       ? rated.reduce((sum, e) => sum + e.rating, 0) / rated.length
       : null;
 
+  const leadingStats: ActivityStat[] | undefined = isCalendarYearPeriod(period)
+    ? [{ label: "Year", value: period }]
+    : undefined;
+
   return {
     username: userId,
     totalContributions: inWindow.length,
@@ -135,6 +144,7 @@ export function mapShelfToContributionData(
       singular: "Book Finished",
       plural: "Books Finished",
     },
+    leadingStats,
     extraStats: [
       {
         label: "Average Rating",

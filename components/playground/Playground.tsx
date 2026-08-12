@@ -137,7 +137,8 @@ export function Playground() {
 
   const previewSrc = embedPath ? embedPath : null;
   const baseHeight = getEmbedHeight(provider, variant, visualization);
-  const autoHeight = visualization === "filmstrip";
+  const autoHeight =
+    visualization === "filmstrip" || visualization === "shelf";
   const height =
     autoHeight && measuredHeight != null
       ? Math.max(baseHeight, measuredHeight)
