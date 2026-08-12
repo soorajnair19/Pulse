@@ -2,15 +2,25 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { ContributionPeriod, ThemeId, WidgetVariant } from "@/types";
+import type {
+  ContributionPeriod,
+  ThemeId,
+  WidgetVariant,
+  WidgetVisualization,
+} from "@/types";
 import {
   buildEmbedSnippet,
+  getEmbedHeight,
   getProvider,
   getSiteOrigin,
   type ProviderId,
 } from "@/lib/providers";
 import { coercePeriodForProvider, parsePeriod } from "@/lib/period";
 import { getTheme } from "@/lib/themes";
+import {
+  coerceVisualizationForProvider,
+  parseVisualization,
+} from "@/lib/visualizations";
 import { ProviderSelect } from "./ProviderSelect";
 import { UsernameForm } from "./UsernameForm";
 import { OptionControls } from "./OptionControls";
@@ -52,6 +62,13 @@ export function Playground() {
   });
   const usernameInput = usernamesByProvider[providerId] ?? "";
   const activeUsername = activeByProvider[providerId] ?? "";
+  const [visualization, setVisualization] = useState<WidgetVisualization>(
+    () =>
+      parseVisualization(
+        searchParams.get("visualization"),
+        getProvider(searchParams.get("provider")).id
+      )
+  );
   const [variant, setVariant] = useState<WidgetVariant>(() =>
     parseVariantParam(searchParams.get("variant"))
   );
@@ -81,6 +98,7 @@ export function Playground() {
     (next: {
       provider: ProviderId;
       username: string;
+      visualization: WidgetVisualization;
       variant: WidgetVariant;
       period: ContributionPeriod;
       theme: ThemeId;
@@ -88,6 +106,7 @@ export function Playground() {
       const params = new URLSearchParams();
       params.set("provider", next.provider);
       if (next.username) params.set("u", next.username);
+      params.set("visualization", next.visualization);
       params.set("variant", next.variant);
       params.set("period", next.period);
       params.set("theme", next.theme);
@@ -97,8 +116,8 @@ export function Playground() {
   );
 
   const embedOptions = useMemo(
-    () => ({ variant, period, theme }),
-    [variant, period, theme]
+    () => ({ variant, period, theme, visualization }),
+    [variant, period, theme, visualization]
   );
 
   const embedPath =
@@ -107,7 +126,7 @@ export function Playground() {
       : null;
 
   const previewSrc = embedPath ? embedPath : null;
-  const height = provider.defaultHeight[variant];
+  const height = getEmbedHeight(provider, variant, visualization);
 
   const embedCode =
     origin && embedPath
@@ -128,6 +147,7 @@ export function Playground() {
     syncUrl({
       provider: providerId,
       username: trimmed,
+      visualization,
       variant,
       period,
       theme,
@@ -138,12 +158,30 @@ export function Playground() {
     setProviderId(id);
     setError(null);
     const nextPeriod = coercePeriodForProvider(period, id);
+    const nextVisualization = coerceVisualizationForProvider(
+      visualization,
+      id
+    );
     setPeriod(nextPeriod);
+    setVisualization(nextVisualization);
     syncUrl({
       provider: id,
       username: activeByProvider[id] ?? "",
+      visualization: nextVisualization,
       variant,
       period: nextPeriod,
+      theme,
+    });
+  }
+
+  function handleVisualizationChange(next: WidgetVisualization) {
+    setVisualization(next);
+    syncUrl({
+      provider: providerId,
+      username: activeUsername,
+      visualization: next,
+      variant,
+      period,
       theme,
     });
   }
@@ -153,6 +191,7 @@ export function Playground() {
     syncUrl({
       provider: providerId,
       username: activeUsername,
+      visualization,
       variant: next,
       period,
       theme,
@@ -164,6 +203,7 @@ export function Playground() {
     syncUrl({
       provider: providerId,
       username: activeUsername,
+      visualization,
       variant,
       period: next,
       theme,
@@ -175,6 +215,7 @@ export function Playground() {
     syncUrl({
       provider: providerId,
       username: activeUsername,
+      visualization,
       variant,
       period,
       theme: next,
@@ -214,9 +255,11 @@ export function Playground() {
 
         <OptionControls
           providerId={providerId}
+          visualization={visualization}
           variant={variant}
           period={period}
           theme={theme}
+          onVisualizationChange={handleVisualizationChange}
           onVariantChange={handleVariantChange}
           onPeriodChange={handlePeriodChange}
           onThemeChange={handleThemeChange}

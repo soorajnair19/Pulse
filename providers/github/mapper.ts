@@ -3,6 +3,7 @@ import type {
   ContributionData,
   ContributionDay,
   ContributionWeek,
+  RepoContribution,
 } from "@/types";
 import { LEVEL_MAP, type GitHubUserResponse } from "./types";
 
@@ -15,6 +16,26 @@ function flattenDays(user: GitHubUserResponse): ContributionDay[] {
         level: LEVEL_MAP[day.contributionLevel],
       }))
   );
+}
+
+function mapRepos(user: GitHubUserResponse): RepoContribution[] {
+  const rows =
+    user.contributionsCollection.commitContributionsByRepository ?? [];
+
+  return rows
+    .filter(
+      (row): row is typeof row & { repository: NonNullable<typeof row.repository> } =>
+        row.repository != null && row.contributions.totalCount > 0
+    )
+    .map((row) => ({
+      name: row.repository.name,
+      nameWithOwner: row.repository.nameWithOwner,
+      url: row.repository.url,
+      contributions: row.contributions.totalCount,
+      stargazerCount: row.repository.stargazerCount,
+      primaryLanguage: row.repository.primaryLanguage,
+    }))
+    .sort((a, b) => b.contributions - a.contributions);
 }
 
 export function mapGitHubUserToContributionData(
@@ -45,5 +66,6 @@ export function mapGitHubUserToContributionData(
     followers: user.followers.totalCount,
     publicRepos: user.repositories.totalCount,
     weeks,
+    repos: mapRepos(user),
   };
 }

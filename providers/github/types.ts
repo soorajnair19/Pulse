@@ -23,6 +23,22 @@ export type GitHubContributionCalendar = {
   weeks: GitHubContributionWeek[];
 };
 
+export type GitHubRepoLanguage = {
+  name: string;
+  color: string | null;
+};
+
+export type GitHubCommitContributionsByRepository = {
+  contributions: { totalCount: number };
+  repository: {
+    name: string;
+    nameWithOwner: string;
+    url: string;
+    stargazerCount: number;
+    primaryLanguage: GitHubRepoLanguage | null;
+  } | null;
+};
+
 export type GitHubUserResponse = {
   login: string;
   name: string | null;
@@ -31,6 +47,7 @@ export type GitHubUserResponse = {
   repositories: { totalCount: number };
   contributionsCollection: {
     contributionCalendar: GitHubContributionCalendar;
+    commitContributionsByRepository: GitHubCommitContributionsByRepository[];
   };
 };
 

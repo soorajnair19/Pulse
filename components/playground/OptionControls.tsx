@@ -1,9 +1,15 @@
 "use client";
 
-import type { ContributionPeriod, ThemeId, WidgetVariant } from "@/types";
+import type {
+  ContributionPeriod,
+  ThemeId,
+  WidgetVariant,
+  WidgetVisualization,
+} from "@/types";
 import type { ProviderId } from "@/lib/providers";
 import { getPeriodOptions } from "@/lib/period";
 import { themes } from "@/lib/themes";
+import { getVisualizations } from "@/lib/visualizations";
 import { GoodreadsYearSelect } from "./GoodreadsYearSelect";
 
 const VARIANTS: Array<{ id: WidgetVariant; label: string }> = [
@@ -24,9 +30,11 @@ const selectStyle = { backgroundImage: SELECT_CHEVRON } as const;
 
 type OptionControlsProps = {
   providerId: ProviderId;
+  visualization: WidgetVisualization;
   variant: WidgetVariant;
   period: ContributionPeriod;
   theme: ThemeId;
+  onVisualizationChange: (visualization: WidgetVisualization) => void;
   onVariantChange: (variant: WidgetVariant) => void;
   onPeriodChange: (period: ContributionPeriod) => void;
   onThemeChange: (theme: ThemeId) => void;
@@ -34,20 +42,49 @@ type OptionControlsProps = {
 
 export function OptionControls({
   providerId,
+  visualization,
   variant,
   period,
   theme,
+  onVisualizationChange,
   onVariantChange,
   onPeriodChange,
   onThemeChange,
 }: OptionControlsProps) {
   const periodOptions = getPeriodOptions(providerId);
+  const visualizationOptions = getVisualizations(providerId);
   const usesYearSelect =
     providerId === "goodreads" || providerId === "letterboxd";
   const durationLabel = usesYearSelect ? "Year" : "Duration";
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="pulse-visualization"
+          className="text-xs font-medium uppercase tracking-wide text-[#7d8590]"
+        >
+          Visualization
+        </label>
+        <select
+          id="pulse-visualization"
+          value={visualization}
+          onChange={(event) =>
+            onVisualizationChange(
+              event.target.value as WidgetVisualization
+            )
+          }
+          className={selectClassName}
+          style={selectStyle}
+        >
+          {visualizationOptions.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex flex-col gap-2">
         <label
           htmlFor="pulse-variant"

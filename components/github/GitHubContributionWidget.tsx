@@ -1,15 +1,22 @@
 "use client";
 
-import type { ContributionData, WidgetVariant } from "@/types";
+import type {
+  ContributionData,
+  WidgetVariant,
+  WidgetVisualization,
+} from "@/types";
 import { formatActivityCount } from "@/lib/utils";
 import { ContributionHeatmap } from "./ContributionHeatmap";
 import { Legend } from "./Legend";
+import { PulseECG } from "./PulseECG";
+import { RepoOrbit } from "./RepoOrbit";
 import { StatsBar } from "./StatsBar";
 import { ThemeProvider } from "./ThemeProvider";
 
 export type WidgetOptions = {
   variant: WidgetVariant;
   themeId: string;
+  visualization?: WidgetVisualization;
   /** Optional brand tint for heatmap cells (e.g. Letterboxd orange). */
   heatmapAccent?: string;
   /** Optional color for tooltip star ratings (e.g. Letterboxd green). */
@@ -29,7 +36,20 @@ type GitHubContributionWidgetProps = {
   options: WidgetOptions;
 };
 
-function variantMinHeight(variant: WidgetVariant): number {
+function widgetMinHeight(
+  variant: WidgetVariant,
+  visualization: WidgetVisualization
+): number {
+  if (visualization === "orbit") {
+    switch (variant) {
+      case "compact":
+        return 120;
+      case "detailed":
+        return 440;
+      default:
+        return 300;
+    }
+  }
   switch (variant) {
     case "compact":
       return 120;
@@ -40,6 +60,18 @@ function variantMinHeight(variant: WidgetVariant): number {
   }
 }
 
+function widgetPadding(
+  variant: WidgetVariant,
+  visualization: WidgetVisualization
+): string {
+  if (visualization === "orbit" && variant !== "compact") {
+    return variant === "detailed" ? "18px 18px 16px 16px" : "16px 16px 14px 16px";
+  }
+  if (variant === "compact") return "12px 14px";
+  if (variant === "detailed") return "16px 18px";
+  return "14px 16px";
+}
+
 export function GitHubContributionWidget({
   data,
   options,
@@ -47,6 +79,7 @@ export function GitHubContributionWidget({
   const {
     variant,
     themeId,
+    visualization = "heatmap",
     heatmapAccent,
     ratingAccent,
     showLegend,
@@ -58,10 +91,11 @@ export function GitHubContributionWidget({
     radius,
   } = options;
 
-  const minHeight = variantMinHeight(variant);
+  const minHeight = widgetMinHeight(variant, visualization);
   const totalLabel = data.totalLabel ?? "Contributions";
   const hasProfileStats =
     data.followers !== undefined || data.publicRepos !== undefined;
+  const isHeatmap = visualization === "heatmap";
 
   return (
     <ThemeProvider
@@ -70,12 +104,7 @@ export function GitHubContributionWidget({
       className="pulse-widget box-border flex h-full w-full flex-col justify-between overflow-hidden font-sans antialiased"
       style={{
         minHeight,
-        padding:
-          variant === "compact"
-            ? "12px 14px"
-            : variant === "detailed"
-              ? "16px 18px"
-              : "14px 16px",
+        padding: widgetPadding(variant, visualization),
       }}
     >
       {variant === "detailed" && (
@@ -156,19 +185,34 @@ export function GitHubContributionWidget({
       )}
 
       <div className="min-h-0 flex-1">
-        <ContributionHeatmap
-          weeks={data.weeks}
-          cellSize={cellSize}
-          gap={gap}
-          radius={radius}
-          showMonths={showMonths}
-          showWeekdays={showWeekdays}
-          countNoun={data.countNoun}
-          ratingAccent={ratingAccent}
-        />
+        {visualization === "pulse" ? (
+          <PulseECG
+            weeks={data.weeks}
+            variant={variant}
+            countNoun={data.countNoun}
+          />
+        ) : visualization === "orbit" ? (
+          <RepoOrbit
+            repos={data.repos ?? []}
+            avatarUrl={data.avatarUrl}
+            username={data.username}
+            variant={variant}
+          />
+        ) : (
+          <ContributionHeatmap
+            weeks={data.weeks}
+            cellSize={cellSize}
+            gap={gap}
+            radius={radius}
+            showMonths={showMonths}
+            showWeekdays={showWeekdays}
+            countNoun={data.countNoun}
+            ratingAccent={ratingAccent}
+          />
+        )}
       </div>
 
-      {showLegend && variant !== "compact" && (
+      {isHeatmap && showLegend && variant !== "compact" && (
         <div className="mt-2">
           <Legend cellSize={Math.max(8, cellSize - 2)} radius={radius} />
         </div>

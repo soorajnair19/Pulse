@@ -27,6 +27,21 @@ export const CONTRIBUTION_QUERY = `
             }
           }
         }
+        commitContributionsByRepository(maxRepositories: 25) {
+          contributions {
+            totalCount
+          }
+          repository {
+            name
+            nameWithOwner
+            url
+            stargazerCount
+            primaryLanguage {
+              name
+              color
+            }
+          }
+        }
       }
     }
   }

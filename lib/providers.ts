@@ -1,4 +1,9 @@
-import type { ContributionPeriod, ThemeId, WidgetVariant } from "@/types";
+import type {
+  ContributionPeriod,
+  ThemeId,
+  WidgetVariant,
+  WidgetVisualization,
+} from "@/types";
 import {
   isValidGoodreadsUserId,
   parseGoodreadsUserId,
@@ -10,6 +15,7 @@ export type EmbedOptions = {
   variant: WidgetVariant;
   theme: ThemeId;
   period: ContributionPeriod;
+  visualization: WidgetVisualization;
 };
 
 export type PulseProvider = {
@@ -40,6 +46,7 @@ function buildQuery(opts: EmbedOptions): string {
     variant: opts.variant,
     theme: opts.theme,
     period: opts.period,
+    visualization: opts.visualization,
   });
   return params.toString();
 }
@@ -139,6 +146,24 @@ export const DEFAULT_PROVIDER_ID: ProviderId = "github";
 export function getProvider(id: string | null | undefined): PulseProvider {
   const found = providers.find((p) => p.id === id && p.enabled);
   return found ?? providers.find((p) => p.id === DEFAULT_PROVIDER_ID)!;
+}
+
+/** Orbit layout needs more vertical space for the scrollable repo table. */
+const ORBIT_EMBED_HEIGHT: Record<WidgetVariant, number> = {
+  compact: 120,
+  default: 300,
+  detailed: 440,
+};
+
+export function getEmbedHeight(
+  provider: PulseProvider,
+  variant: WidgetVariant,
+  visualization: WidgetVisualization
+): number {
+  if (visualization === "orbit") {
+    return ORBIT_EMBED_HEIGHT[variant];
+  }
+  return provider.defaultHeight[variant];
 }
 
 export function getSiteOrigin(): string {

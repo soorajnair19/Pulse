@@ -64,20 +64,20 @@ export const PreviewFrame = forwardRef<HTMLIFrameElement, PreviewFrameProps>(
     const showLoading = Boolean(src && (!active || !active.ready));
 
     return (
-      <div className="flex w-full flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wide text-[#7d8590]">
-            Preview
-          </p>
-          {showLoading && (
-            <span className="text-xs text-[#7d8590]">Loading…</span>
-          )}
-        </div>
+    <div className="mt-6 flex w-full flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium uppercase tracking-wide text-[#7d8590]">
+          Preview
+        </p>
+        {showLoading && (
+          <span className="text-xs text-[#7d8590]">Loading…</span>
+        )}
+      </div>
 
-        <div
-          className="relative w-full overflow-hidden rounded-lg border border-[#30363d] bg-[#0d1117]"
-          style={{ minHeight: height }}
-        >
+      <div
+        className="relative w-full overflow-hidden rounded-lg border border-[#30363d] bg-[#0d1117] p-4 pl-5"
+        style={{ minHeight: height + 32 }}
+      >
           {!src && (
             <div
               className="flex items-center justify-center px-4 text-center text-sm text-[#7d8590]"
@@ -108,7 +108,10 @@ export const PreviewFrame = forwardRef<HTMLIFrameElement, PreviewFrameProps>(
                 title={isActive ? title : `${key} preview`}
                 width="100%"
                 height={height}
-                className={cn("block w-full border-0", !isActive && "hidden")}
+                className={cn(
+                  "block w-full rounded-md border-0",
+                  !isActive && "hidden"
+                )}
                 onLoad={() => {
                   setCache((prev) => {
                     const cur = prev[key];

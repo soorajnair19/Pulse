@@ -29,6 +29,21 @@ export type ContributionWeek = {
   contributionDays: ContributionDay[];
 };
 
+export type RepoLanguage = {
+  name: string;
+  color: string | null;
+};
+
+/** Per-repo commit activity for Orbit (and future) visualizations. */
+export type RepoContribution = {
+  name: string;
+  nameWithOwner: string;
+  url: string;
+  contributions: number;
+  stargazerCount?: number;
+  primaryLanguage?: RepoLanguage | null;
+};
+
 export type ContributionData = {
   username: string;
   totalContributions: number;
@@ -47,9 +62,14 @@ export type ContributionData = {
   countNoun?: CountNoun;
   /** Extra stats beyond total + streaks (e.g. Average Rating, Rewatches). */
   extraStats?: ActivityStat[];
+  /** Repos with commit contributions in the period (GitHub Orbit). */
+  repos?: RepoContribution[];
 };
 
 export type WidgetVariant = "compact" | "default" | "detailed";
+
+/** Widget body renderer — heatmap is the classic default. */
+export type WidgetVisualization = "heatmap" | "pulse" | "orbit";
 
 /** Rolling lookbacks (GitHub). */
 export type RollingPeriod = "1m" | "3m" | "6m" | "1y";
