@@ -65,7 +65,8 @@ function widgetMinHeight(
   }
   switch (variant) {
     case "compact":
-      return 120;
+      // Room for header + 7-row heatmap (cellSize 9) + bottom padding.
+      return 148;
     case "detailed":
       return 380;
     default:
@@ -86,7 +87,8 @@ function widgetPadding(
   if (visualization === "shelf" && variant !== "compact") {
     return variant === "detailed" ? "18px 18px 16px 16px" : "16px 16px 14px 16px";
   }
-  if (variant === "compact") return "12px 14px";
+  // Extra bottom pad so compact classic cells aren't clipped at the edge.
+  if (variant === "compact") return "12px 14px 18px 14px";
   if (variant === "detailed") return "16px 18px";
   return "14px 16px";
 }

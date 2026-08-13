@@ -70,7 +70,7 @@ export const providers: PulseProvider[] = [
     buildEmbedPath: (username, opts) =>
       `/embed/github/${encodeURIComponent(username.trim())}?${buildQuery(opts)}`,
     defaultHeight: {
-      compact: 120,
+      compact: 148,
       default: 220,
       detailed: 380,
     },
@@ -94,7 +94,7 @@ export const providers: PulseProvider[] = [
     buildEmbedPath: (username, opts) =>
       `/embed/letterboxd/${encodeURIComponent(username.trim())}?${buildQuery(opts)}`,
     defaultHeight: {
-      compact: 120,
+      compact: 148,
       default: 220,
       detailed: 380,
     },
@@ -122,7 +122,7 @@ export const providers: PulseProvider[] = [
       return `/embed/goodreads/${encodeURIComponent(id)}?${buildQuery(opts)}`;
     },
     defaultHeight: {
-      compact: 120,
+      compact: 148,
       default: 220,
       detailed: 380,
     },
@@ -137,7 +137,7 @@ export const providers: PulseProvider[] = [
     enabled: false,
     validateUsername: () => "Coming soon.",
     buildEmbedPath: () => "/",
-    defaultHeight: { compact: 120, default: 220, detailed: 380 },
+    defaultHeight: { compact: 148, default: 220, detailed: 380 },
   },
 ];
 
