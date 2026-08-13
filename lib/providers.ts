@@ -72,7 +72,7 @@ export const providers: PulseProvider[] = [
     defaultHeight: {
       compact: 148,
       default: 220,
-      detailed: 380,
+      detailed: 280,
     },
   },
   {
@@ -96,7 +96,7 @@ export const providers: PulseProvider[] = [
     defaultHeight: {
       compact: 148,
       default: 220,
-      detailed: 380,
+      detailed: 280,
     },
   },
   {
@@ -124,7 +124,7 @@ export const providers: PulseProvider[] = [
     defaultHeight: {
       compact: 148,
       default: 220,
-      detailed: 380,
+      detailed: 280,
     },
   },
   {
@@ -137,7 +137,7 @@ export const providers: PulseProvider[] = [
     enabled: false,
     validateUsername: () => "Coming soon.",
     buildEmbedPath: () => "/",
-    defaultHeight: { compact: 148, default: 220, detailed: 380 },
+    defaultHeight: { compact: 148, default: 220, detailed: 280 },
   },
 ];
 
@@ -169,6 +169,13 @@ const SHELF_EMBED_HEIGHT: Record<WidgetVariant, number> = {
   detailed: 480,
 };
 
+/** Pulse chart needs more vertical room than classic heatmap. */
+const PULSE_EMBED_HEIGHT: Record<WidgetVariant, number> = {
+  compact: 148,
+  default: 220,
+  detailed: 380,
+};
+
 export function getEmbedHeight(
   provider: PulseProvider,
   variant: WidgetVariant,
@@ -182,6 +189,9 @@ export function getEmbedHeight(
   }
   if (visualization === "shelf") {
     return SHELF_EMBED_HEIGHT[variant];
+  }
+  if (visualization === "pulse") {
+    return PULSE_EMBED_HEIGHT[variant];
   }
   return provider.defaultHeight[variant];
 }

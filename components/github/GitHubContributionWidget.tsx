@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type {
+  ActivityStat,
   ContributionData,
   WidgetVariant,
   WidgetVisualization,
@@ -68,7 +69,9 @@ function widgetMinHeight(
       // Room for header + 7-row heatmap (cellSize 9) + bottom padding.
       return 148;
     case "detailed":
-      return 380;
+      // Classic: fit profile + stats + heatmap + legend (no dead space under grid).
+      // Pulse keeps a taller chart area.
+      return visualization === "pulse" ? 380 : 280;
     default:
       return 220;
   }
@@ -127,9 +130,23 @@ export function GitHubContributionWidget({
     listItems.length
   );
   const totalLabel = data.totalLabel ?? "Contributions";
-  const hasProfileStats =
-    data.followers !== undefined || data.publicRepos !== undefined;
   const isHeatmap = visualization === "heatmap";
+  // Classic packs to content height so the legend sits under the grid (no flex gap).
+  const fillFrame = !isAutoHeight && !isHeatmap;
+
+  // Detailed: fold followers/repos into the main stats row (same style as streaks).
+  const extraStats = useMemo(() => {
+    if (variant !== "detailed") return data.extraStats;
+    const profileStats: ActivityStat[] = [];
+    if (data.followers !== undefined) {
+      profileStats.push({ label: "Followers", value: data.followers });
+    }
+    if (data.publicRepos !== undefined) {
+      profileStats.push({ label: "Repos", value: data.publicRepos });
+    }
+    if (profileStats.length === 0) return data.extraStats;
+    return [...(data.extraStats ?? []), ...profileStats];
+  }, [variant, data.extraStats, data.followers, data.publicRepos]);
 
   return (
     <ThemeProvider
@@ -137,9 +154,9 @@ export function GitHubContributionWidget({
       heatmapAccent={heatmapAccent}
       className={cn(
         "pulse-widget box-border flex w-full flex-col font-sans antialiased",
-        isAutoHeight
-          ? "h-auto overflow-visible"
-          : "h-full justify-between overflow-hidden"
+        fillFrame
+          ? "h-full justify-between overflow-hidden"
+          : "h-auto overflow-visible"
       )}
       style={{
         minHeight,
@@ -172,35 +189,6 @@ export function GitHubContributionWidget({
               @{data.username}
             </p>
           </div>
-          {hasProfileStats && (
-            <div
-              className="flex shrink-0 gap-4 text-right text-xs"
-              style={{ color: "var(--pulse-text-muted)" }}
-            >
-              {data.followers !== undefined && (
-                <div>
-                  <div
-                    className="font-semibold tabular-nums"
-                    style={{ color: "var(--pulse-text)" }}
-                  >
-                    {data.followers.toLocaleString()}
-                  </div>
-                  <div>followers</div>
-                </div>
-              )}
-              {data.publicRepos !== undefined && (
-                <div>
-                  <div
-                    className="font-semibold tabular-nums"
-                    style={{ color: "var(--pulse-text)" }}
-                  >
-                    {data.publicRepos.toLocaleString()}
-                  </div>
-                  <div>repos</div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       )}
 
@@ -218,13 +206,13 @@ export function GitHubContributionWidget({
             longestStreak={data.longestStreak}
             totalLabel={totalLabel}
             leadingStats={data.leadingStats}
-            extraStats={data.extraStats}
+            extraStats={extraStats}
             showStreaks={showStreaks}
           />
         </div>
       )}
 
-      <div className={isAutoHeight ? "w-full" : "min-h-0 flex-1"}>
+      <div className={fillFrame ? "min-h-0 flex-1" : "w-full"}>
         {visualization === "pulse" ? (
           <PulseECG
             weeks={data.weeks}
@@ -262,13 +250,13 @@ export function GitHubContributionWidget({
             ratingAccent={ratingAccent}
           />
         )}
-      </div>
 
-      {isHeatmap && showLegend && variant !== "compact" && (
-        <div className="mt-2">
-          <Legend cellSize={Math.max(8, cellSize - 2)} radius={radius} />
-        </div>
-      )}
+        {isHeatmap && showLegend && variant !== "compact" && (
+          <div className="mt-2.5">
+            <Legend cellSize={Math.max(8, cellSize - 2)} radius={radius} />
+          </div>
+        )}
+      </div>
     </ThemeProvider>
   );
 }
